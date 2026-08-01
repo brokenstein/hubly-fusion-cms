@@ -14,7 +14,240 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_state: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          updated_at: string
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          updated_at?: string
+          user_id: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          user_id?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      brand_kits: {
+        Row: {
+          colors: Json
+          created_at: string
+          fonts: Json
+          id: string
+          logo_url: string | null
+          name: string
+          notes: string | null
+          source_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          colors?: Json
+          created_at?: string
+          fonts?: Json
+          id?: string
+          logo_url?: string | null
+          name: string
+          notes?: string | null
+          source_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          colors?: Json
+          created_at?: string
+          fonts?: Json
+          id?: string
+          logo_url?: string | null
+          name?: string
+          notes?: string | null
+          source_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      devices: {
+        Row: {
+          created_at: string
+          download_url: string | null
+          id: string
+          image_url: string | null
+          model: string
+          name: string
+          notes: string | null
+          os: string
+          platform_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          image_url?: string | null
+          model?: string
+          name: string
+          notes?: string | null
+          os?: string
+          platform_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          image_url?: string | null
+          model?: string
+          name?: string
+          notes?: string | null
+          os?: string
+          platform_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devices_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platforms: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      roi_deals: {
+        Row: {
+          brand_kit_id: string | null
+          company: string | null
+          created_at: string
+          id: string
+          name: string
+          results: Json
+          share_slug: string | null
+          template_id: string
+          template_name: string | null
+          updated_at: string
+          user_id: string
+          values: Json
+        }
+        Insert: {
+          brand_kit_id?: string | null
+          company?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          results?: Json
+          share_slug?: string | null
+          template_id: string
+          template_name?: string | null
+          updated_at?: string
+          user_id: string
+          values?: Json
+        }
+        Update: {
+          brand_kit_id?: string | null
+          company?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          results?: Json
+          share_slug?: string | null
+          template_id?: string
+          template_name?: string | null
+          updated_at?: string
+          user_id?: string
+          values?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roi_deals_brand_kit_id_fkey"
+            columns: ["brand_kit_id"]
+            isOneToOne: false
+            referencedRelation: "brand_kits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      software_versions: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          name: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          name: string
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "software_versions_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
