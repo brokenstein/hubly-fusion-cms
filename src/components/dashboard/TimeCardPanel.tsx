@@ -24,8 +24,8 @@ function nowTime() {
 
 function hoursBetween(a: string, b: string) {
   if (!a || !b) return 0;
-  const [ah, am] = a.split(":").map(Number);
-  const [bh, bm] = b.split(":").map(Number);
+  const [ah = 0, am = 0] = a.split(":").map(Number);
+  const [bh = 0, bm = 0] = b.split(":").map(Number);
   const mins = bh * 60 + bm - (ah * 60 + am);
   return mins > 0 ? mins / 60 : 0;
 }
