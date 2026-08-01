@@ -63,6 +63,15 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  --color-status-touched: var(--status-touched);
+  --color-status-touched-foreground: var(--status-touched-foreground);
+  --color-status-working: var(--status-working);
+  --color-status-working-foreground: var(--status-working-foreground);
+  --color-status-other: var(--status-other);
+  --color-status-other-foreground: var(--status-other-foreground);
+  --color-status-closed: var(--status-closed);
+  --color-status-closed-foreground: var(--status-closed-foreground);
+
   --shadow-panel: 0 1px 2px oklch(0.2 0.03 220 / 0.06), 0 8px 24px oklch(0.2 0.03 220 / 0.06);
   --shadow-lift: 0 2px 4px oklch(0.2 0.03 220 / 0.08), 0 18px 40px oklch(0.2 0.03 220 / 0.1);
 }
