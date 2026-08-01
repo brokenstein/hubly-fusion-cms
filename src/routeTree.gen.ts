@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
 import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDevicesRouteImport } from './routes/_authenticated/devices'
+import { Route as AuthenticatedRoiRouteImport } from './routes/_authenticated/roi'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,6 +31,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedBrandRoute = AuthenticatedBrandRouteImport.update({
+  id: '/brand',
+  path: '/brand',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCasesRoute = AuthenticatedCasesRouteImport.update({
   id: '/cases',
@@ -45,43 +52,57 @@ const AuthenticatedDevicesRoute = AuthenticatedDevicesRouteImport.update({
   path: '/devices',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRoiRoute = AuthenticatedRoiRouteImport.update({
+  id: '/roi',
+  path: '/roi',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/brand': typeof AuthenticatedBrandRoute
   '/cases': typeof AuthenticatedCasesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/devices': typeof AuthenticatedDevicesRoute
+  '/roi': typeof AuthenticatedRoiRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/brand': typeof AuthenticatedBrandRoute
   '/cases': typeof AuthenticatedCasesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/devices': typeof AuthenticatedDevicesRoute
+  '/roi': typeof AuthenticatedRoiRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/brand': typeof AuthenticatedBrandRoute
   '/_authenticated/cases': typeof AuthenticatedCasesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/devices': typeof AuthenticatedDevicesRoute
+  '/_authenticated/roi': typeof AuthenticatedRoiRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/cases' | '/dashboard' | '/devices'
+  fullPaths:
+    '/' | '/auth' | '/brand' | '/cases' | '/dashboard' | '/devices' | '/roi'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/cases' | '/dashboard' | '/devices'
+  to: '/' | '/auth' | '/brand' | '/cases' | '/dashboard' | '/devices' | '/roi'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/brand'
     | '/_authenticated/cases'
     | '/_authenticated/dashboard'
     | '/_authenticated/devices'
+    | '/_authenticated/roi'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -113,6 +134,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/brand': {
+      id: '/_authenticated/brand'
+      path: '/brand'
+      fullPath: '/brand'
+      preLoaderRoute: typeof AuthenticatedBrandRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/cases': {
       id: '/_authenticated/cases'
       path: '/cases'
@@ -134,19 +162,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDevicesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/roi': {
+      id: '/_authenticated/roi'
+      path: '/roi'
+      fullPath: '/roi'
+      preLoaderRoute: typeof AuthenticatedRoiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBrandRoute: typeof AuthenticatedBrandRoute
   AuthenticatedCasesRoute: typeof AuthenticatedCasesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDevicesRoute: typeof AuthenticatedDevicesRoute
+  AuthenticatedRoiRoute: typeof AuthenticatedRoiRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBrandRoute: AuthenticatedBrandRoute,
   AuthenticatedCasesRoute: AuthenticatedCasesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDevicesRoute: AuthenticatedDevicesRoute,
+  AuthenticatedRoiRoute: AuthenticatedRoiRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

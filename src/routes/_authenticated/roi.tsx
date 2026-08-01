@@ -250,7 +250,7 @@ function RoiPage() {
                 <span className="text-xs text-muted-foreground">{deal.company}</span>
               )}
               <span className="ml-auto text-xs tabular-nums text-muted-foreground">
-                {formatCurrency(Number((deal.results as Record<string, number>)?.netAnnual ?? 0))}{" "}
+                {formatCurrency(Number((deal.results as Record<string, number>)?.["netAnnual"] ?? 0))}{" "}
                 net · {deal.template_name}
               </span>
               <Button

@@ -61,7 +61,7 @@ function Overview() {
         supabase.from("app_state").select("value").eq("key", "dash.cases").maybeSingle(),
       ]);
       const cases = Array.isArray(caseState.data?.value)
-        ? (caseState.data!.value as CaseEntry[])
+        ? (caseState.data!.value as unknown as CaseEntry[])
         : [];
       return {
         devices: devices.count ?? 0,
