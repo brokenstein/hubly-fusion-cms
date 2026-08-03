@@ -87,7 +87,7 @@ export async function fetchStatusPage(baseUrl: string, slug: string): Promise<Up
         status: statusFromBeat(last?.status),
         uptime24h:
           typeof uptimeList[`${monitor.id}_24`] === "number"
-            ? uptimeList[`${monitor.id}_24`] * 100
+            ? (uptimeList[`${monitor.id}_24`] as number) * 100
             : null,
         avgPing: pings.length
           ? Math.round(pings.reduce((a: number, b: number) => a + b, 0) / pings.length)

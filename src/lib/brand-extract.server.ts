@@ -86,7 +86,7 @@ export async function fetchSiteSnapshot(url: string) {
 
   const fontSet = new Set<string>();
   for (const m of html.matchAll(/font-family\s*:\s*([^;"'}]+)/gi)) {
-    for (const part of m[1].split(",")) {
+    for (const part of (m[1] ?? "").split(",")) {
       const name = part.replace(/["']/g, "").trim();
       if (
         name &&
@@ -100,7 +100,7 @@ export async function fetchSiteSnapshot(url: string) {
     }
   }
   for (const m of html.matchAll(/fonts\.googleapis\.com\/css2?\?family=([^"'&]+)/gi)) {
-    fontSet.add(decodeURIComponent(m[1].split(":")[0]).replace(/\+/g, " "));
+    fontSet.add(decodeURIComponent((m[1] ?? "").split(":")[0] ?? "").replace(/\+/g, " "));
   }
 
   return {
@@ -160,16 +160,18 @@ export async function refineWithAi(
   if (!match) return {};
   try {
     const parsed = JSON.parse(match[0]) as Partial<ExtractedBrand>;
-    return {
-      name: typeof parsed.name === "string" ? parsed.name : undefined,
-      colors: Array.isArray(parsed.colors)
-        ? parsed.colors.filter((c) => typeof c === "string" && /^#[0-9a-f]{3,8}$/i.test(c))
-        : undefined,
-      fonts: Array.isArray(parsed.fonts)
-        ? parsed.fonts.filter((f) => typeof f === "string")
-        : undefined,
-      notes: typeof parsed.notes === "string" ? parsed.notes : undefined,
-    };
+    const out: Partial<ExtractedBrand> = {};
+    if (typeof parsed.name === "string") out.name = parsed.name;
+    if (Array.isArray(parsed.colors)) {
+      out.colors = parsed.colors.filter(
+        (c) => typeof c === "string" && /^#[0-9a-f]{3,8}$/i.test(c),
+      );
+    }
+    if (Array.isArray(parsed.fonts)) {
+      out.fonts = parsed.fonts.filter((f) => typeof f === "string");
+    }
+    if (typeof parsed.notes === "string") out.notes = parsed.notes;
+    return out;
   } catch {
     return {};
   }
