@@ -242,6 +242,35 @@ function NewKitDialog() {
           <DialogTitle>New brand kit</DialogTitle>
         </DialogHeader>
         <div className="grid gap-3">
+          <div className="space-y-1.5 rounded-lg border border-dashed border-border p-3">
+            <Label htmlFor="kit-extract">Build it from a website</Label>
+            <div className="flex gap-2">
+              <Input
+                id="kit-extract"
+                value={form.source_url}
+                placeholder="acme.com"
+                onChange={(e) => setForm({ ...form, source_url: e.target.value })}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={!form.source_url.trim() || extract.isPending}
+                onClick={() => extract.mutate()}
+              >
+                {extract.isPending ? (
+                  <Loader2 className="mr-1 size-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-1 size-4" />
+                )}
+                Auto-fill
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Reads the site's logo, palette and typefaces, then fills the fields below so you can
+              tweak them before saving.
+            </p>
+          </div>
+
           {(
             [
               ["name", "Name", "Acme Corp"],
