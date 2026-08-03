@@ -7,6 +7,7 @@ import {
   Calculator,
   LogOut,
   LayoutDashboard,
+  Activity,
 } from "lucide-react";
 
 import {
@@ -31,6 +32,7 @@ const modules = [
   { to: "/devices", label: "Device Hub", icon: MonitorSmartphone },
   { to: "/brand", label: "Brand Kits", icon: Palette },
   { to: "/roi", label: "ROI Calculator", icon: Calculator },
+  { to: "/uptime", label: "Uptime Monitor", icon: Activity },
 ] as const;
 
 export function AppSidebar() {
