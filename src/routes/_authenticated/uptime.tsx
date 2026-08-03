@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_authenticated/uptime")({
       },
     ],
   }),
-  component: UptimePage;
+  component: UptimePage,
 });
 
 interface UptimeSite {
