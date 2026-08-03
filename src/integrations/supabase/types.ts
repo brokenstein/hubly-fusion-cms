@@ -248,6 +248,39 @@ export type Database = {
           },
         ]
       }
+      uptime_sites: {
+        Row: {
+          base_url: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          status_page_slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base_url: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          status_page_slug?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base_url?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          status_page_slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

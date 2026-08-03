@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Palette, Plus, Trash2 } from "lucide-react";
+import { Loader2, Palette, Plus, Sparkles, Trash2 } from "lucide-react";
+
+import { extractBrandKit } from "@/lib/brand.functions";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -179,6 +182,25 @@ function NewKitDialog() {
     notes: "",
   });
 
+  const runExtract = useServerFn(extractBrandKit);
+  const extract = useMutation({
+    mutationFn: async () => runExtract({ data: { url: form.source_url } }),
+    onSuccess: (kit) => {
+      setForm((prev) => ({
+        ...prev,
+        name: prev.name || kit.name,
+        source_url: kit.source_url,
+        logo_url: kit.logo_url ?? prev.logo_url,
+        colors: kit.colors.join(", ") || prev.colors,
+        fonts: kit.fonts.join(", ") || prev.fonts,
+        notes: kit.notes || prev.notes,
+      }));
+      toast.success("Brand details pulled from the website");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   const save = useMutation({
     mutationFn: async () => {
       const { data: auth } = await supabase.auth.getUser();
@@ -220,6 +242,35 @@ function NewKitDialog() {
           <DialogTitle>New brand kit</DialogTitle>
         </DialogHeader>
         <div className="grid gap-3">
+          <div className="space-y-1.5 rounded-lg border border-dashed border-border p-3">
+            <Label htmlFor="kit-extract">Build it from a website</Label>
+            <div className="flex gap-2">
+              <Input
+                id="kit-extract"
+                value={form.source_url}
+                placeholder="acme.com"
+                onChange={(e) => setForm({ ...form, source_url: e.target.value })}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={!form.source_url.trim() || extract.isPending}
+                onClick={() => extract.mutate()}
+              >
+                {extract.isPending ? (
+                  <Loader2 className="mr-1 size-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-1 size-4" />
+                )}
+                Auto-fill
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Reads the site's logo, palette and typefaces, then fills the fields below so you can
+              tweak them before saving.
+            </p>
+          </div>
+
           {(
             [
               ["name", "Name", "Acme Corp"],
