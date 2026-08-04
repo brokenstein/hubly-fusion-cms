@@ -62,14 +62,85 @@ async function getJson(url: string): Promise<any> {
   }
 }
 
+/**
+ * Uptime Kuma API keys only authenticate the Prometheus `/metrics` endpoint.
+ * We use it as a fallback when no public status page is available.
+ */
+async function fetchViaMetrics(base: string, apiKey: string): Promise<UptimeSnapshot> {
+  const res = await fetch(`${base}/metrics`, {
+    headers: {
+      // Basic auth with an empty username and the API key as the password.
+      Authorization: `Basic ${btoa(`:${apiKey}`)}`,
+      accept: "text/plain",
+    },
+    redirect: "follow",
+  });
+  if (!res.ok) {
+    throw new Error(`Uptime Kuma /metrics responded with ${res.status}`);
+  }
+  const text = await res.text();
+
+  const parse = (metric: string) => {
+    const out: { name: string; url: string | null; value: number }[] = [];
+    const re = new RegExp(`^${metric}\\{([^}]*)\\}\\s+([-\\d.eE+]+)$`, "gm");
+    for (const m of text.matchAll(re)) {
+      const labels = m[1] ?? "";
+      const name = labels.match(/monitor_name="([^"]*)"/)?.[1] ?? "Monitor";
+      const rawUrl = labels.match(/monitor_url="([^"]*)"/)?.[1] ?? "";
+      out.push({
+        name,
+        url: rawUrl && rawUrl !== "null" && rawUrl !== "https://" ? rawUrl : null,
+        value: Number(m[2]),
+      });
+    }
+    return out;
+  };
+
+  const statuses = parse("monitor_status");
+  const responseTimes = parse("monitor_response_time");
+
+  const monitors: UptimeMonitor[] = statuses.map((entry, index) => {
+    const ping = responseTimes.find((r) => r.name === entry.name)?.value ?? null;
+    return {
+      id: index + 1,
+      name: entry.name,
+      url: entry.url,
+      status: statusFromBeat(entry.value),
+      uptime24h: null,
+      avgPing: ping !== null && Number.isFinite(ping) ? Math.round(ping) : null,
+      beats: [{ status: entry.value, time: new Date().toISOString(), ping }],
+      groupName: "Monitors (API key)",
+    };
+  });
+
+  return {
+    title: "Uptime Kuma",
+    description: "Live data read through the Uptime Kuma API key.",
+    statusPageUrl: `${base}/dashboard`,
+    monitors,
+    upCount: monitors.filter((m) => m.status === "up").length,
+    downCount: monitors.filter((m) => m.status === "down").length,
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
 export async function fetchStatusPage(baseUrl: string, slug: string): Promise<UptimeSnapshot> {
   const base = normalizeBase(baseUrl);
   const safeSlug = encodeURIComponent(slug.trim() || "default");
+  const apiKey = process.env["UPTIME_KUMA_API_KEY"];
 
-  const [page, heartbeat] = await Promise.all([
-    getJson(`${base}/api/status-page/${safeSlug}`),
-    getJson(`${base}/api/status-page/heartbeat/${safeSlug}`),
-  ]);
+  let page: any;
+  let heartbeat: any;
+  try {
+    [page, heartbeat] = await Promise.all([
+      getJson(`${base}/api/status-page/${safeSlug}`),
+      getJson(`${base}/api/status-page/heartbeat/${safeSlug}`),
+    ]);
+  } catch (error) {
+    // No public status page? Fall back to the authenticated metrics endpoint.
+    if (apiKey) return fetchViaMetrics(base, apiKey);
+    throw error;
+  }
 
   const beatsByMonitor: Record<string, any[]> = heartbeat?.heartbeatList ?? {};
   const uptimeList: Record<string, number> = heartbeat?.uptimeList ?? {};
@@ -99,6 +170,15 @@ export async function fetchStatusPage(baseUrl: string, slug: string): Promise<Up
         })),
         groupName: group?.name ?? "Monitors",
       });
+    }
+  }
+
+  if (monitors.length === 0 && apiKey) {
+    // Published page with nothing public on it — try the API key instead.
+    try {
+      return await fetchViaMetrics(base, apiKey);
+    } catch {
+      // Fall through to the (empty) status page result.
     }
   }
 

@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -33,6 +34,7 @@ function AuthenticatedLayout() {
         <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
           <SidebarTrigger />
           <span className="font-display text-sm text-muted-foreground">OpsKit workspace</span>
+          <ThemeToggle className="ml-auto" />
         </header>
         <div className="p-4 md:p-6">
           {/* Nested module routes render here. */}
