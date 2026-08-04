@@ -147,9 +147,7 @@ function DevicesPage() {
         <div>
           <h1 className="font-display text-2xl font-semibold">Device Hub</h1>
           <p className="text-sm text-muted-foreground">
-            {list.length} device{list.length === 1 ? "" : "s"} ·{" "}
-            {platforms.data?.length ?? 0} platform
-            {(platforms.data?.length ?? 0) === 1 ? "" : "s"}
+            Registered players, platforms and the software versions they run.
           </p>
         </div>
         <div className="flex gap-2">
@@ -158,9 +156,25 @@ function DevicesPage() {
         </div>
       </header>
 
+      <div className="flex flex-wrap items-center gap-6">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Layers className="size-5 text-primary" />
+          <span className="text-sm">
+            <span className="font-semibold text-foreground">{list.length}</span> Registered Devices
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <FolderOpen className="size-5 text-primary" />
+          <span className="text-sm">
+            <span className="font-semibold text-foreground">{platforms.data?.length ?? 0}</span>{" "}
+            Platforms
+          </span>
+        </div>
+      </div>
+
       {devices.isLoading && (
         <div className="flex justify-center py-12">
-          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          <Loader2 className="size-6 animate-spin text-primary" />
         </div>
       )}
 
@@ -191,54 +205,92 @@ function DevicesPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {filtered.map((device) => (
-          <Card key={device.id} className="overflow-hidden p-0">
-            {device.image_url && (
-              <img
-                src={device.image_url}
-                alt={`${device.name} device photo`}
-                loading="lazy"
-                className="h-36 w-full object-cover"
-              />
-            )}
-            <div className="space-y-3 p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h2 className="text-base font-semibold">{device.name}</h2>
-                  <p className="text-xs text-muted-foreground">
-                    {[device.model, device.os].filter(Boolean).join(" · ")}
-                  </p>
-                </div>
+          <article key={device.id} className="device-card">
+            <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-secondary to-muted p-6">
+              {device.image_url ? (
+                <img
+                  src={device.image_url}
+                  alt={`${device.name} device photo`}
+                  loading="lazy"
+                  className="max-h-full max-w-full object-contain drop-shadow-2xl"
+                />
+              ) : (
+                <Monitor className="size-20 text-muted-foreground/50" />
+              )}
+              <div className="absolute right-2 top-2">
                 <Button
                   size="icon"
                   variant="ghost"
                   aria-label={`Delete ${device.name}`}
+                  className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => removeDevice.mutate(device.id)}
                 >
                   <Trash2 className="size-4" />
                 </Button>
               </div>
-              {device.software_versions.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {device.software_versions.map((v) => (
-                    <Badge key={v.id} variant="secondary">
-                      {v.name} {v.version}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-              {device.download_url && (
-                <Button asChild size="sm" variant="outline">
-                  <a href={device.download_url} target="_blank" rel="noreferrer">
-                    <Download className="mr-1 size-3.5" /> Firmware
-                  </a>
-                </Button>
-              )}
             </div>
-          </Card>
+
+            <div className="p-6">
+              <div className="mb-4 flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h2 className="truncate text-xl font-semibold">{device.name}</h2>
+                  <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                    <Cpu className="size-4" />
+                    <span className="truncate">{device.model}</span>
+                  </div>
+                </div>
+                <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
+                  <Monitor className="size-3.5" /> Active
+                </span>
+              </div>
+
+              <div className="mb-4 flex items-center justify-between gap-2">
+                {device.os ? <span className="version-badge">{device.os}</span> : <span />}
+                {device.download_url && (
+                  <a
+                    href={device.download_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-primary transition-colors hover:text-primary/80"
+                  >
+                    <Download className="size-3.5" /> Download
+                  </a>
+                )}
+              </div>
+
+              <h3 className="mb-3 text-sm font-medium text-muted-foreground">Software Versions</h3>
+              <div className="overflow-hidden rounded-lg bg-secondary/50">
+                {device.software_versions.length > 0 ? (
+                  <table className="w-full table-fixed text-sm">
+                    <tbody>
+                      {device.software_versions.map((v, index) => (
+                        <tr
+                          key={v.id}
+                          className={`transition-colors hover:bg-primary/5 ${
+                            index % 2 === 0 ? "bg-transparent" : "bg-secondary/60"
+                          }`}
+                        >
+                          <td className="truncate px-4 py-2.5 font-medium">{v.name}</td>
+                          <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono font-medium text-primary">
+                            {v.version}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="p-4 text-center text-sm text-muted-foreground">
+                    No software versions registered
+                  </p>
+                )}
+              </div>
+            </div>
+          </article>
         ))}
       </div>
+
     </div>
   );
 }
