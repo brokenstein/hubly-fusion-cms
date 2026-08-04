@@ -2,7 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Loader2, MonitorSmartphone, Plus, Trash2, Download } from "lucide-react";
+import {
+  Cpu,
+  Download,
+  FolderOpen,
+  Layers,
+  Loader2,
+  Monitor,
+  MonitorSmartphone,
+  Plus,
+  Trash2,
+} from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
