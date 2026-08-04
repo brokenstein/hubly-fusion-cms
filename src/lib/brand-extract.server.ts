@@ -159,7 +159,7 @@ async function pickLogo(html: string, url: string): Promise<string | null> {
 
   const absolutes = candidates
     .map((c) => absolute(c, url))
-    .filter((c): c is string => Boolean(c) && !c.endsWith(".svg#"));
+    .filter((c): c is string => typeof c === "string" && !c.endsWith(".svg#"));
 
   for (const candidate of absolutes.slice(0, 6)) {
     if (await urlIsImage(candidate)) return candidate;
