@@ -173,6 +173,15 @@ export async function fetchStatusPage(baseUrl: string, slug: string): Promise<Up
     }
   }
 
+  if (monitors.length === 0 && apiKey) {
+    // Published page with nothing public on it — try the API key instead.
+    try {
+      return await fetchViaMetrics(base, apiKey);
+    } catch {
+      // Fall through to the (empty) status page result.
+    }
+  }
+
   return {
     title: page?.config?.title ?? "Status page",
     description: page?.config?.description ?? null,
