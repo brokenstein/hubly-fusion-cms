@@ -17,12 +17,12 @@ export const Route = createFileRoute("/auth")({
       { title: "Sign in — OpsKit workspace" },
       {
         name: "description",
-        content: "Sign in to OpsKit to manage cases, devices, brand kits and ROI models.",
+        content: "Sign in to OpsKit to manage cases, devices, uptime monitors and links.",
       },
       { property: "og:title", content: "Sign in — OpsKit workspace" },
       {
         property: "og:description",
-        content: "Access your unified operations workspace: cases, devices, brand kits, ROI.",
+        content: "Access your unified operations workspace: cases, devices, uptime, links.",
       },
     ],
   }),
@@ -96,11 +96,11 @@ function AuthPage() {
             Four tools. One operations workspace.
           </h1>
           <p className="text-sm text-sidebar-foreground/70">
-            Case tracking, device software matrix, brand kits and sales ROI modeling — unified
+            Case tracking, device software matrix, uptime monitoring and link dashboards — unified
             behind a single login with shared data.
           </p>
         </div>
-        <p className="text-xs text-sidebar-foreground/50">Cases · Devices · Brand · ROI</p>
+        <p className="text-xs text-sidebar-foreground/50">Cases · Devices · Uptime · Links</p>
       </section>
 
       <section className="flex items-center justify-center p-6">
