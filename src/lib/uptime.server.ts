@@ -28,7 +28,14 @@ export function normalizeBase(raw: string): string {
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw new Error("Only http and https URLs are supported");
   }
-  return `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
+  // Strip Uptime Kuma app paths so we never build /dashboard/dashboard or
+  // /status/x/status/x when the user pastes a dashboard or status page URL.
+  const path = url.pathname
+    .replace(/\/+$/, "")
+    .replace(/\/(dashboard|manage-status-page|settings|add)(\/.*)?$/i, "")
+    .replace(/\/status(-page)?(\/[^/]*)?$/i, "")
+    .replace(/\/+$/, "");
+  return `${url.origin}${path}`;
 }
 
 function statusFromBeat(code: number | undefined): UptimeMonitor["status"] {
