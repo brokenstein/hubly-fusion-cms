@@ -232,7 +232,7 @@ function DevicesPage() {
       )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {filtered.map((device) => (
+        {filtered.map((device, index) => (
           <article key={device.id} className="device-card">
             <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-secondary to-muted p-6">
               {device.image_url ? (
@@ -245,7 +245,30 @@ function DevicesPage() {
               ) : (
                 <Monitor className="size-20 text-muted-foreground/50" />
               )}
-              <div className="absolute right-2 top-2">
+              <div className="absolute left-2 top-2 flex gap-1">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label={`Move ${device.name} earlier`}
+                  disabled={index === 0 || reorder.isPending}
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => move(filtered, index, -1)}
+                >
+                  <ArrowLeft className="size-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label={`Move ${device.name} later`}
+                  disabled={index === filtered.length - 1 || reorder.isPending}
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => move(filtered, index, 1)}
+                >
+                  <ArrowRight className="size-4" />
+                </Button>
+              </div>
+              <div className="absolute right-2 top-2 flex gap-1">
+                <EditDeviceDialog device={device} platforms={platforms.data ?? []} />
                 <Button
                   size="icon"
                   variant="ghost"
@@ -257,6 +280,7 @@ function DevicesPage() {
                 </Button>
               </div>
             </div>
+
 
             <div className="p-6">
               <div className="mb-4 flex items-start justify-between gap-2">
