@@ -68,7 +68,8 @@ export function useCloudState<T>(key: string, initial: T) {
     })();
 
     const channel = supabase
-      .channel(`app_state:${userId}:${key}`)
+      .channel(`app_state:${userId}:${key}:${instanceId}`)
+
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "app_state", filter: `key=eq.${key}` },
