@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
+  ArrowLeft,
+  ArrowRight,
   Cpu,
   Download,
   FolderOpen,
@@ -10,6 +12,7 @@ import {
   Loader2,
   Monitor,
   MonitorSmartphone,
+  Pencil,
   Plus,
   Trash2,
 } from "lucide-react";
