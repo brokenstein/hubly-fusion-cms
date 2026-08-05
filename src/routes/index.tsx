@@ -60,9 +60,10 @@ function Landing() {
             Four of your tools, <span className="text-gradient-brand">one workspace</span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground">
-            OpsKit combines the Case Tracker, Device Hub, Brand Kit builder and Sales ROI
-            Calculator behind a single login and one shared database.
+            OpsKit combines the Case Tracker, Device Hub, Uptime Monitor and Link Tracker behind a
+            single login and one shared database.
           </p>
+
           <div className="mt-8 flex justify-center gap-3">
             <Button asChild size="lg">
               <Link to="/auth">
@@ -92,7 +93,7 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-        OpsKit · Cases · Devices · Brand · ROI
+        OpsKit · Cases · Devices · Uptime · Links
       </footer>
     </main>
   );
