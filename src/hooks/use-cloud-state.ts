@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -10,8 +10,10 @@ export function useCloudState<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(initial);
   const [loaded, setLoaded] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const instanceId = useId();
   const skipNextWrite = useRef(true);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -66,7 +68,8 @@ export function useCloudState<T>(key: string, initial: T) {
     })();
 
     const channel = supabase
-      .channel(`app_state:${userId}:${key}`)
+      .channel(`app_state:${userId}:${key}:${instanceId}`)
+
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "app_state", filter: `key=eq.${key}` },
