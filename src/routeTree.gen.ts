@@ -16,6 +16,7 @@ import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDevicesRouteImport } from './routes/_authenticated/devices'
+import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
 import { Route as AuthenticatedRoiRouteImport } from './routes/_authenticated/roi'
 import { Route as AuthenticatedUptimeRouteImport } from './routes/_authenticated/uptime'
 
@@ -53,6 +54,11 @@ const AuthenticatedDevicesRoute = AuthenticatedDevicesRouteImport.update({
   path: '/devices',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLinksRoute = AuthenticatedLinksRouteImport.update({
+  id: '/links',
+  path: '/links',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRoiRoute = AuthenticatedRoiRouteImport.update({
   id: '/roi',
   path: '/roi',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/cases': typeof AuthenticatedCasesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/devices': typeof AuthenticatedDevicesRoute
+  '/links': typeof AuthenticatedLinksRoute
   '/roi': typeof AuthenticatedRoiRoute
   '/uptime': typeof AuthenticatedUptimeRoute
 }
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/cases': typeof AuthenticatedCasesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/devices': typeof AuthenticatedDevicesRoute
+  '/links': typeof AuthenticatedLinksRoute
   '/roi': typeof AuthenticatedRoiRoute
   '/uptime': typeof AuthenticatedUptimeRoute
 }
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/_authenticated/cases': typeof AuthenticatedCasesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/devices': typeof AuthenticatedDevicesRoute
+  '/_authenticated/links': typeof AuthenticatedLinksRoute
   '/_authenticated/roi': typeof AuthenticatedRoiRoute
   '/_authenticated/uptime': typeof AuthenticatedUptimeRoute
 }
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/cases'
     | '/dashboard'
     | '/devices'
+    | '/links'
     | '/roi'
     | '/uptime'
   fileRoutesByTo: FileRoutesByTo
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/cases'
     | '/dashboard'
     | '/devices'
+    | '/links'
     | '/roi'
     | '/uptime'
   id:
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cases'
     | '/_authenticated/dashboard'
     | '/_authenticated/devices'
+    | '/_authenticated/links'
     | '/_authenticated/roi'
     | '/_authenticated/uptime'
   fileRoutesById: FileRoutesById
@@ -187,6 +199,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDevicesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/links': {
+      id: '/_authenticated/links'
+      path: '/links'
+      fullPath: '/links'
+      preLoaderRoute: typeof AuthenticatedLinksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/roi': {
       id: '/_authenticated/roi'
       path: '/roi'
@@ -209,6 +228,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCasesRoute: typeof AuthenticatedCasesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDevicesRoute: typeof AuthenticatedDevicesRoute
+  AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
   AuthenticatedRoiRoute: typeof AuthenticatedRoiRoute
   AuthenticatedUptimeRoute: typeof AuthenticatedUptimeRoute
 }
@@ -218,6 +238,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCasesRoute: AuthenticatedCasesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDevicesRoute: AuthenticatedDevicesRoute,
+  AuthenticatedLinksRoute: AuthenticatedLinksRoute,
   AuthenticatedRoiRoute: AuthenticatedRoiRoute,
   AuthenticatedUptimeRoute: AuthenticatedUptimeRoute,
 }
@@ -233,13 +254,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

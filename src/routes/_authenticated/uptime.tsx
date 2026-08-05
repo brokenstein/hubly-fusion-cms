@@ -211,6 +211,27 @@ function SiteStatus({ site }: { site: UptimeSite }) {
         </div>
       </Card>
 
+      <Card className="overflow-hidden p-0">
+        <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">
+          <p className="text-xs font-medium text-muted-foreground">
+            Live status page preview — {snapshot.statusPageUrl.replace(/^https?:\/\//, "")}
+          </p>
+          <Button asChild variant="ghost" size="sm">
+            <a href={snapshot.statusPageUrl} target="_blank" rel="noreferrer">
+              Open <ArrowUpRight className="ml-1 size-3.5" />
+            </a>
+          </Button>
+        </div>
+        <iframe
+          key={snapshot.statusPageUrl}
+          src={snapshot.statusPageUrl}
+          title={`${snapshot.title} status page`}
+          className="h-[70vh] w-full border-0 bg-background"
+          referrerPolicy="no-referrer"
+        />
+      </Card>
+
+
       {snapshot.monitors.length === 0 && (
         <Card className="border-dashed p-10 text-center text-sm text-muted-foreground">
           This status page has no public monitors yet.

@@ -1,22 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ClipboardList, MonitorSmartphone, Palette, Calculator, ArrowRight } from "lucide-react";
+import { ClipboardList, MonitorSmartphone, Activity, Link2, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OpsKit — Cases, Devices, Brand & ROI in one CMS" },
+      { title: "OpsKit — Cases, Devices, Uptime & Links in one CMS" },
       {
         name: "description",
         content:
-          "OpsKit merges case tracking, a device software matrix, brand kit management and sales ROI modeling into one workspace with a single login.",
+          "OpsKit merges case tracking, a device software matrix, Uptime Kuma monitoring and a Dashy link dashboard into one workspace with a single login.",
       },
-      { property: "og:title", content: "OpsKit — One CMS for four workflows" },
+      { property: "og:title", content: "OpsKit — One CMS for your daily tools" },
       {
         property: "og:description",
-        content: "Case tracking, device versions, brand kits and ROI modeling in one workspace.",
+        content: "Case tracking, device versions, uptime monitoring and link dashboards in one workspace.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Landing,
@@ -34,16 +36,17 @@ const modules = [
     body: "A searchable catalog of devices and the software versions approved for each one.",
   },
   {
-    icon: Palette,
-    title: "Brand Kits",
-    body: "Capture palettes, typography and tokens as reusable brand guides and design systems.",
+    icon: Activity,
+    title: "Uptime Monitor",
+    body: "Live monitor health and status page previews pulled from your Uptime Kuma instances.",
   },
   {
-    icon: Calculator,
-    title: "ROI Calculator",
-    body: "Model savings and payback for a prospect, then save the scenario to share later.",
+    icon: Link2,
+    title: "Link Tracker",
+    body: "Your Dashy dashboard embedded in the workspace so every internal link stays one click away.",
   },
 ];
+
 
 function Landing() {
   return (
