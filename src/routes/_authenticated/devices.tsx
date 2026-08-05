@@ -69,6 +69,7 @@ interface Device {
   image_url: string | null;
   download_url: string | null;
   platform_id: string | null;
+  sort_order: number;
   software_versions: SoftwareVersion[];
 }
 interface Platform {
