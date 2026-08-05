@@ -99,7 +99,8 @@ function DevicesPage() {
     queryFn: async (): Promise<Device[]> => {
       const { data: rows, error } = await supabase
         .from("devices")
-        .select("id, name, model, os, image_url, download_url, platform_id")
+        .select("id, name, model, os, image_url, download_url, platform_id, sort_order")
+        .order("sort_order")
         .order("created_at");
       if (error) throw error;
       const { data: versions, error: vErr } = await supabase
@@ -141,6 +142,21 @@ function DevicesPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const reorder = useMutation({
+    mutationFn: async (pairs: { id: string; sort_order: number }[]) => {
+      for (const p of pairs) {
+        const { error } = await supabase
+          .from("devices")
+          .update({ sort_order: p.sort_order })
+          .eq("id", p.id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["devices"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const list = devices.data ?? [];
   const filtered =
