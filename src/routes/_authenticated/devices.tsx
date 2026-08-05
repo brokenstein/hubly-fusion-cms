@@ -161,6 +161,17 @@ function DevicesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const move = (visible: Device[], index: number, delta: number) => {
+    const target = index + delta;
+    if (target < 0 || target >= visible.length) return;
+    const reordered = [...visible];
+    const [item] = reordered.splice(index, 1);
+    reordered.splice(target, 0, item!);
+    reorder.mutate(reordered.map((d, i) => ({ id: d.id, sort_order: i + 1 })));
+  };
+
+
+
 
   const list = devices.data ?? [];
   const filtered =
