@@ -537,3 +537,144 @@ function AddDeviceDialog({ platforms }: { platforms: Platform[] }) {
     </Dialog>
   );
 }
+
+function EditDeviceDialog({
+  device,
+  platforms,
+}: {
+  device: Device;
+  platforms: Platform[];
+}) {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    name: device.name,
+    model: device.model,
+    os: device.os,
+    image_url: device.image_url ?? "",
+    download_url: device.download_url ?? "",
+    platform_id: device.platform_id ?? UNASSIGNED,
+    software: device.software_versions.map((v) => `${v.name} ${v.version}`.trim()).join(", "),
+  });
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("devices")
+        .update({
+          name: form.name.trim(),
+          model: form.model,
+          os: form.os,
+          image_url: form.image_url || null,
+          download_url: form.download_url || null,
+          platform_id: form.platform_id === UNASSIGNED ? null : form.platform_id,
+        })
+        .eq("id", device.id);
+      if (error) throw error;
+
+      const { error: delErr } = await supabase
+        .from("software_versions")
+        .delete()
+        .eq("device_id", device.id);
+      if (delErr) throw delErr;
+
+      const versions = form.software
+        .split(",")
+        .map((chunk) => chunk.trim())
+        .filter(Boolean)
+        .map((chunk) => {
+          const parts = chunk.split(/\s+/);
+          const version = parts.length > 1 ? parts.pop()! : "";
+          return { device_id: device.id, name: parts.join(" "), version };
+        });
+      if (versions.length) {
+        const { error: vErr } = await supabase.from("software_versions").insert(versions);
+        if (vErr) throw vErr;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Device updated");
+      queryClient.invalidateQueries({ queryKey: ["devices"] });
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label={`Edit ${device.name}`}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Pencil className="size-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit {device.name}</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-3">
+          {(
+            [
+              ["name", "Name", "BrightSign XT244"],
+              ["model", "Model", "XT244"],
+              ["os", "Operating system", "BrightSignOS 9"],
+              ["image_url", "Image URL", "https://…"],
+              ["download_url", "Firmware / download URL", "https://…"],
+            ] as const
+          ).map(([key, label, placeholder]) => (
+            <div key={key} className="space-y-1.5">
+              <Label htmlFor={`edit-${device.id}-${key}`}>{label}</Label>
+              <Input
+                id={`edit-${device.id}-${key}`}
+                value={form[key]}
+                placeholder={placeholder}
+                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+              />
+            </div>
+          ))}
+          <div className="space-y-1.5">
+            <Label>Platform</Label>
+            <Select
+              value={form.platform_id}
+              onValueChange={(v) => setForm({ ...form, platform_id: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Unassigned" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={UNASSIGNED}>Unassigned</SelectItem>
+                {platforms.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor={`edit-${device.id}-software`}>Software versions</Label>
+            <Input
+              id={`edit-${device.id}-software`}
+              value={form.software}
+              placeholder="Player 4.2, Firmware 9.0.1"
+              onChange={(e) => setForm({ ...form, software: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground">
+              Comma separated — last word of each entry is used as the version.
+            </p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button disabled={!form.name.trim() || save.isPending} onClick={() => save.mutate()}>
+            {save.isPending && <Loader2 className="mr-1 size-4 animate-spin" />}
+            Save changes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
