@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LayoutGrid, LogOut, LayoutDashboard } from "lucide-react";
+import { LayoutGrid, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
 
 import {
   Sidebar,
@@ -17,12 +17,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ModuleSettings } from "@/components/module-settings";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { WORKSPACE_MODULES, useModules } from "@/hooks/use-modules";
 
 export function AppSidebar() {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { enabled } = useModules();
+  const { isAdmin } = useIsAdmin();
   const initials = (user?.email ?? "?").slice(0, 2).toUpperCase();
 
   const items = [
@@ -32,6 +34,7 @@ export function AppSidebar() {
       label: m.label,
       icon: m.icon,
     })),
+    ...(isAdmin ? [{ to: "/admin", label: "User Admin", icon: ShieldCheck }] : []),
   ];
 
   return (
