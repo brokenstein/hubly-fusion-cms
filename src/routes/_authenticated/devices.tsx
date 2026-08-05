@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
+  ArrowLeft,
+  ArrowRight,
   Cpu,
   Download,
   FolderOpen,
@@ -10,6 +12,7 @@ import {
   Loader2,
   Monitor,
   MonitorSmartphone,
+  Pencil,
   Plus,
   Trash2,
 } from "lucide-react";
@@ -69,6 +72,7 @@ interface Device {
   image_url: string | null;
   download_url: string | null;
   platform_id: string | null;
+  sort_order: number;
   software_versions: SoftwareVersion[];
 }
 interface Platform {
@@ -99,7 +103,8 @@ function DevicesPage() {
     queryFn: async (): Promise<Device[]> => {
       const { data: rows, error } = await supabase
         .from("devices")
-        .select("id, name, model, os, image_url, download_url, platform_id")
+        .select("id, name, model, os, image_url, download_url, platform_id, sort_order")
+        .order("sort_order")
         .order("created_at");
       if (error) throw error;
       const { data: versions, error: vErr } = await supabase
@@ -141,6 +146,32 @@ function DevicesPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const reorder = useMutation({
+    mutationFn: async (pairs: { id: string; sort_order: number }[]) => {
+      for (const p of pairs) {
+        const { error } = await supabase
+          .from("devices")
+          .update({ sort_order: p.sort_order })
+          .eq("id", p.id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["devices"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const move = (visible: Device[], index: number, delta: number) => {
+    const target = index + delta;
+    if (target < 0 || target >= visible.length) return;
+    const reordered = [...visible];
+    const [item] = reordered.splice(index, 1);
+    reordered.splice(target, 0, item!);
+    reorder.mutate(reordered.map((d, i) => ({ id: d.id, sort_order: i + 1 })));
+  };
+
+
+
 
   const list = devices.data ?? [];
   const filtered =
@@ -215,7 +246,7 @@ function DevicesPage() {
       )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {filtered.map((device) => (
+        {filtered.map((device, index) => (
           <article key={device.id} className="device-card">
             <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-secondary to-muted p-6">
               {device.image_url ? (
@@ -228,7 +259,30 @@ function DevicesPage() {
               ) : (
                 <Monitor className="size-20 text-muted-foreground/50" />
               )}
-              <div className="absolute right-2 top-2">
+              <div className="absolute left-2 top-2 flex gap-1">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label={`Move ${device.name} earlier`}
+                  disabled={index === 0 || reorder.isPending}
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => move(filtered, index, -1)}
+                >
+                  <ArrowLeft className="size-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label={`Move ${device.name} later`}
+                  disabled={index === filtered.length - 1 || reorder.isPending}
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => move(filtered, index, 1)}
+                >
+                  <ArrowRight className="size-4" />
+                </Button>
+              </div>
+              <div className="absolute right-2 top-2 flex gap-1">
+                <EditDeviceDialog device={device} platforms={platforms.data ?? []} />
                 <Button
                   size="icon"
                   variant="ghost"
@@ -240,6 +294,7 @@ function DevicesPage() {
                 </Button>
               </div>
             </div>
+
 
             <div className="p-6">
               <div className="mb-4 flex items-start justify-between gap-2">
@@ -476,6 +531,147 @@ function AddDeviceDialog({ platforms }: { platforms: Platform[] }) {
           >
             {save.isPending && <Loader2 className="mr-1 size-4 animate-spin" />}
             Save device
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditDeviceDialog({
+  device,
+  platforms,
+}: {
+  device: Device;
+  platforms: Platform[];
+}) {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    name: device.name,
+    model: device.model,
+    os: device.os,
+    image_url: device.image_url ?? "",
+    download_url: device.download_url ?? "",
+    platform_id: device.platform_id ?? UNASSIGNED,
+    software: device.software_versions.map((v) => `${v.name} ${v.version}`.trim()).join(", "),
+  });
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("devices")
+        .update({
+          name: form.name.trim(),
+          model: form.model,
+          os: form.os,
+          image_url: form.image_url || null,
+          download_url: form.download_url || null,
+          platform_id: form.platform_id === UNASSIGNED ? null : form.platform_id,
+        })
+        .eq("id", device.id);
+      if (error) throw error;
+
+      const { error: delErr } = await supabase
+        .from("software_versions")
+        .delete()
+        .eq("device_id", device.id);
+      if (delErr) throw delErr;
+
+      const versions = form.software
+        .split(",")
+        .map((chunk) => chunk.trim())
+        .filter(Boolean)
+        .map((chunk) => {
+          const parts = chunk.split(/\s+/);
+          const version = parts.length > 1 ? parts.pop()! : "";
+          return { device_id: device.id, name: parts.join(" "), version };
+        });
+      if (versions.length) {
+        const { error: vErr } = await supabase.from("software_versions").insert(versions);
+        if (vErr) throw vErr;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Device updated");
+      queryClient.invalidateQueries({ queryKey: ["devices"] });
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label={`Edit ${device.name}`}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Pencil className="size-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit {device.name}</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-3">
+          {(
+            [
+              ["name", "Name", "BrightSign XT244"],
+              ["model", "Model", "XT244"],
+              ["os", "Operating system", "BrightSignOS 9"],
+              ["image_url", "Image URL", "https://…"],
+              ["download_url", "Firmware / download URL", "https://…"],
+            ] as const
+          ).map(([key, label, placeholder]) => (
+            <div key={key} className="space-y-1.5">
+              <Label htmlFor={`edit-${device.id}-${key}`}>{label}</Label>
+              <Input
+                id={`edit-${device.id}-${key}`}
+                value={form[key]}
+                placeholder={placeholder}
+                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+              />
+            </div>
+          ))}
+          <div className="space-y-1.5">
+            <Label>Platform</Label>
+            <Select
+              value={form.platform_id}
+              onValueChange={(v) => setForm({ ...form, platform_id: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Unassigned" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={UNASSIGNED}>Unassigned</SelectItem>
+                {platforms.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor={`edit-${device.id}-software`}>Software versions</Label>
+            <Input
+              id={`edit-${device.id}-software`}
+              value={form.software}
+              placeholder="Player 4.2, Firmware 9.0.1"
+              onChange={(e) => setForm({ ...form, software: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground">
+              Comma separated — last word of each entry is used as the version.
+            </p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button disabled={!form.name.trim() || save.isPending} onClick={() => save.mutate()}>
+            {save.isPending && <Loader2 className="mr-1 size-4 animate-spin" />}
+            Save changes
           </Button>
         </DialogFooter>
       </DialogContent>
