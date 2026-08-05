@@ -1,14 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import {
-  LayoutGrid,
-  ClipboardList,
-  MonitorSmartphone,
-  Palette,
-  Calculator,
-  LogOut,
-  LayoutDashboard,
-  Activity,
-} from "lucide-react";
+import { LayoutGrid, LogOut, LayoutDashboard } from "lucide-react";
 
 import {
   Sidebar,
@@ -24,21 +15,24 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { ModuleSettings } from "@/components/module-settings";
 import { useAuth } from "@/hooks/useAuth";
-
-const modules = [
-  { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { to: "/cases", label: "Case Tracker", icon: ClipboardList },
-  { to: "/devices", label: "Device Hub", icon: MonitorSmartphone },
-  { to: "/brand", label: "Brand Kits", icon: Palette },
-  { to: "/roi", label: "ROI Calculator", icon: Calculator },
-  { to: "/uptime", label: "Uptime Monitor", icon: Activity },
-] as const;
+import { WORKSPACE_MODULES, useModules } from "@/hooks/use-modules";
 
 export function AppSidebar() {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { enabled } = useModules();
   const initials = (user?.email ?? "?").slice(0, 2).toUpperCase();
+
+  const items = [
+    { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
+    ...WORKSPACE_MODULES.filter((m) => enabled[m.key]).map((m) => ({
+      to: m.to,
+      label: m.label,
+      icon: m.icon,
+    })),
+  ];
 
   return (
     <Sidebar>
@@ -56,7 +50,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {modules.map((item) => (
+              {items.map((item) => (
                 <SidebarMenuItem key={item.to}>
                   <SidebarMenuButton
                     asChild
@@ -76,7 +70,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex items-center gap-2 px-1 py-1">
+        <div className="flex items-center gap-1 px-1 py-1">
           <Avatar className="size-8">
             <AvatarFallback className="bg-sidebar-accent text-xs text-sidebar-accent-foreground">
               {initials}
@@ -85,6 +79,7 @@ export function AppSidebar() {
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-medium">{user?.email ?? "Signed in"}</p>
           </div>
+          <ModuleSettings />
           <Button
             variant="ghost"
             size="icon"
