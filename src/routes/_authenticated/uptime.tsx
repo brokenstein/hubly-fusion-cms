@@ -369,3 +369,57 @@ function AddSiteDialog() {
     </Dialog>
   );
 }
+
+/**
+ * Inline preview of either the public status page or the full Uptime Kuma
+ * dashboard. The dashboard requires a login: sign in to Uptime Kuma in this
+ * browser once and the embedded view uses that same session.
+ */
+function PreviewCard({ snapshot }: { snapshot: UptimeSnapshot }) {
+  const [target, setTarget] = useState<"status" | "dashboard">("status");
+  const url = target === "status" ? snapshot.statusPageUrl : snapshot.dashboardUrl;
+
+  return (
+    <Card className="overflow-hidden p-0">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2">
+        <div className="flex items-center gap-3">
+          <Tabs value={target} onValueChange={(v) => setTarget(v as "status" | "dashboard")}>
+            <TabsList>
+              <TabsTrigger value="status">Status page</TabsTrigger>
+              <TabsTrigger value="dashboard">Dashboard (login)</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <p className="text-xs font-medium text-muted-foreground">
+            {url.replace(/^https?:\/\//, "")}
+          </p>
+        </div>
+        <Button asChild variant="ghost" size="sm">
+          <a href={url} target="_blank" rel="noreferrer">
+            Open <ArrowUpRight className="ml-1 size-3.5" />
+          </a>
+        </Button>
+      </div>
+      {target === "dashboard" && (
+        <p className="border-b border-border bg-secondary/50 px-4 py-2 text-xs text-muted-foreground">
+          The Uptime Kuma dashboard is private. Sign in once at{" "}
+          <a
+            href={snapshot.dashboardUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary hover:underline"
+          >
+            {snapshot.dashboardUrl.replace(/^https?:\/\//, "")}
+          </a>{" "}
+          in this browser and it will load here with your session. If it stays blank, Uptime Kuma
+          is blocking embedding — use the Status page tab or the monitor cards below.
+        </p>
+      )}
+      <iframe
+        key={url}
+        src={url}
+        title={`${snapshot.title} ${target === "status" ? "status page" : "dashboard"}`}
+        className="h-[70vh] w-full border-0 bg-background"
+      />
+    </Card>
+  );
+}
