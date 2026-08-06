@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -71,6 +72,7 @@ interface Device {
   os: string;
   image_url: string | null;
   download_url: string | null;
+  notes: string | null;
   platform_id: string | null;
   sort_order: number;
   software_versions: SoftwareVersion[];
@@ -103,7 +105,7 @@ function DevicesPage() {
     queryFn: async (): Promise<Device[]> => {
       const { data: rows, error } = await supabase
         .from("devices")
-        .select("id, name, model, os, image_url, download_url, platform_id, sort_order")
+        .select("id, name, model, os, image_url, download_url, notes, platform_id, sort_order")
         .order("sort_order")
         .order("created_at");
       if (error) throw error;
@@ -324,7 +326,15 @@ function DevicesPage() {
                 )}
               </div>
 
+              {device.notes && (
+                <div className="mb-4 whitespace-pre-wrap rounded-lg border border-border/60 bg-secondary/40 p-3 text-xs text-muted-foreground">
+                  {device.notes}
+                </div>
+              )}
+
               <h3 className="mb-3 text-sm font-medium text-muted-foreground">Software Versions</h3>
+
+
               <div className="overflow-hidden rounded-lg bg-secondary/50">
                 {device.software_versions.length > 0 ? (
                   <table className="w-full table-fixed text-sm">
@@ -408,6 +418,7 @@ function AddDeviceDialog({ platforms }: { platforms: Platform[] }) {
     os: "",
     image_url: "",
     download_url: "",
+    notes: "",
     platform_id: UNASSIGNED,
     software: "",
   });
@@ -424,6 +435,7 @@ function AddDeviceDialog({ platforms }: { platforms: Platform[] }) {
           os: form.os,
           image_url: form.image_url || null,
           download_url: form.download_url || null,
+          notes: form.notes.trim() || null,
           platform_id: form.platform_id === UNASSIGNED ? null : form.platform_id,
         })
         .select("id")
@@ -453,6 +465,7 @@ function AddDeviceDialog({ platforms }: { platforms: Platform[] }) {
         os: "",
         image_url: "",
         download_url: "",
+        notes: "",
         platform_id: UNASSIGNED,
         software: "",
       });
@@ -492,6 +505,16 @@ function AddDeviceDialog({ platforms }: { platforms: Platform[] }) {
               />
             </div>
           ))}
+          <div className="space-y-1.5">
+            <Label htmlFor="device-notes">Notes / extra details</Label>
+            <Textarea
+              id="device-notes"
+              rows={4}
+              value={form.notes}
+              placeholder={"Location: Store 214\nSerial: ABC-123\nAnything else worth keeping"}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
+          </div>
           <div className="space-y-1.5">
             <Label>Platform</Label>
             <Select
@@ -553,6 +576,7 @@ function EditDeviceDialog({
     os: device.os,
     image_url: device.image_url ?? "",
     download_url: device.download_url ?? "",
+    notes: device.notes ?? "",
     platform_id: device.platform_id ?? UNASSIGNED,
     software: device.software_versions.map((v) => `${v.name} ${v.version}`.trim()).join(", "),
   });
@@ -567,7 +591,9 @@ function EditDeviceDialog({
           os: form.os,
           image_url: form.image_url || null,
           download_url: form.download_url || null,
+          notes: form.notes.trim() || null,
           platform_id: form.platform_id === UNASSIGNED ? null : form.platform_id,
+
         })
         .eq("id", device.id);
       if (error) throw error;
@@ -636,6 +662,16 @@ function EditDeviceDialog({
               />
             </div>
           ))}
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-notes">Notes / extra details</Label>
+            <Textarea
+              id="edit-notes"
+              rows={4}
+              value={form.notes}
+              placeholder={"Location: Store 214\nSerial: ABC-123\nAnything else worth keeping"}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
+          </div>
           <div className="space-y-1.5">
             <Label>Platform</Label>
             <Select

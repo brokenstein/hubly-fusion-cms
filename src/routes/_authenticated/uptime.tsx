@@ -211,25 +211,8 @@ function SiteStatus({ site }: { site: UptimeSite }) {
         </div>
       </Card>
 
-      <Card className="overflow-hidden p-0">
-        <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">
-          <p className="text-xs font-medium text-muted-foreground">
-            Live status page preview — {snapshot.statusPageUrl.replace(/^https?:\/\//, "")}
-          </p>
-          <Button asChild variant="ghost" size="sm">
-            <a href={snapshot.statusPageUrl} target="_blank" rel="noreferrer">
-              Open <ArrowUpRight className="ml-1 size-3.5" />
-            </a>
-          </Button>
-        </div>
-        <iframe
-          key={snapshot.statusPageUrl}
-          src={snapshot.statusPageUrl}
-          title={`${snapshot.title} status page`}
-          className="h-[70vh] w-full border-0 bg-background"
-          referrerPolicy="no-referrer"
-        />
-      </Card>
+      <PreviewCard snapshot={snapshot} />
+
 
 
       {snapshot.monitors.length === 0 && (
@@ -384,5 +367,59 @@ function AddSiteDialog() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * Inline preview of either the public status page or the full Uptime Kuma
+ * dashboard. The dashboard requires a login: sign in to Uptime Kuma in this
+ * browser once and the embedded view uses that same session.
+ */
+function PreviewCard({ snapshot }: { snapshot: UptimeSnapshot }) {
+  const [target, setTarget] = useState<"status" | "dashboard">("status");
+  const url = target === "status" ? snapshot.statusPageUrl : snapshot.dashboardUrl;
+
+  return (
+    <Card className="overflow-hidden p-0">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2">
+        <div className="flex items-center gap-3">
+          <Tabs value={target} onValueChange={(v) => setTarget(v as "status" | "dashboard")}>
+            <TabsList>
+              <TabsTrigger value="status">Status page</TabsTrigger>
+              <TabsTrigger value="dashboard">Dashboard (login)</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <p className="text-xs font-medium text-muted-foreground">
+            {url.replace(/^https?:\/\//, "")}
+          </p>
+        </div>
+        <Button asChild variant="ghost" size="sm">
+          <a href={url} target="_blank" rel="noreferrer">
+            Open <ArrowUpRight className="ml-1 size-3.5" />
+          </a>
+        </Button>
+      </div>
+      <p className="border-b border-border bg-secondary/50 px-4 py-2 text-xs text-muted-foreground">
+        {target === "dashboard"
+          ? "The Uptime Kuma dashboard is private — sign in once at "
+          : "If the frame stays blank, that Uptime Kuma server blocks embedding (X-Frame-Options). Open it directly at "}
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-primary hover:underline"
+        >
+          {url.replace(/^https?:\/\//, "")}
+        </a>
+        {" "}
+        in this browser. Either way the live monitor cards below always show current data.
+      </p>
+      <iframe
+        key={url}
+        src={url}
+        title={`${snapshot.title} ${target === "status" ? "status page" : "dashboard"}`}
+        className="h-[70vh] w-full border-0 bg-background"
+      />
+    </Card>
   );
 }

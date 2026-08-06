@@ -1,0 +1,88 @@
+import { CalendarPlus } from "lucide-react";
+
+import { Card } from "@/components/ui/card";
+import type { DayHistory } from "@/lib/case-types";
+
+interface Props {
+  history: DayHistory[];
+  today: string;
+  todayCount: number;
+}
+
+function fmtDate(d: string) {
+  return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function shiftDay(key: string, days: number) {
+  const dt = new Date(key + "T00:00:00");
+  dt.setDate(dt.getDate() + days);
+  const year = dt.getFullYear();
+  const month = String(dt.getMonth() + 1).padStart(2, "0");
+  const day = String(dt.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/** Rolling log of how many brand-new cases were added each day. */
+export function NewCasesLog({ history, today, todayCount }: Props) {
+  if (!today) return null;
+
+  const byDate = new Map<string, number>();
+  history.forEach((h) => byDate.set(h.date, h.newCasesAdded ?? 0));
+  byDate.set(today, todayCount);
+
+  const days = Array.from({ length: 14 }, (_, i) => shiftDay(today, -i));
+  const rows = days.map((date) => ({ date, count: byDate.get(date) ?? 0 }));
+  const max = Math.max(1, ...rows.map((r) => r.count));
+
+  const week = rows.slice(0, 7).reduce((s, r) => s + r.count, 0);
+  const twoWeeks = rows.reduce((s, r) => s + r.count, 0);
+
+  return (
+    <Card className="space-y-4 p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <CalendarPlus className="h-4 w-4 text-muted-foreground" />
+          <div>
+            <h2 className="text-base font-semibold leading-tight">New cases log</h2>
+            <p className="text-xs text-muted-foreground">
+              New cases added each day · auto-logged
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-4 text-xs text-muted-foreground">
+          <span>
+            Last 7 days <span className="font-semibold tabular-nums text-foreground">{week}</span>
+          </span>
+          <span>
+            Last 14 days{" "}
+            <span className="font-semibold tabular-nums text-foreground">{twoWeeks}</span>
+          </span>
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        {rows.map((row) => (
+          <div key={row.date} className="flex items-center gap-3">
+            <span className="w-28 shrink-0 text-xs text-muted-foreground">
+              {fmtDate(row.date)}
+              {row.date === today && <span className="ml-1 text-primary">•</span>}
+            </span>
+            <span className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+              <span
+                className="block h-full rounded-full bg-primary transition-all"
+                style={{ width: `${(row.count / max) * 100}%` }}
+              />
+            </span>
+            <span className="w-8 shrink-0 text-right text-xs font-medium tabular-nums">
+              {row.count}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}

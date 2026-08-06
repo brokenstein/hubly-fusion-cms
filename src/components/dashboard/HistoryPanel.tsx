@@ -68,7 +68,7 @@ export function HistoryPanel({ history, setHistory }: Props) {
                   <div key={h.date} className="rounded-md border border-border/60 bg-secondary/40">
                     <button
                       onClick={() => setExpanded(isOpen ? null : h.date)}
-                      className="grid w-full grid-cols-12 items-center gap-2 rounded-md p-2.5 text-left transition hover:bg-secondary/60"
+                      className="grid w-full grid-cols-13 items-center gap-2 rounded-md p-2.5 text-left transition hover:bg-secondary/60"
                     >
                       <span className="col-span-3 flex items-center gap-2 text-sm font-medium">
                         {fmtDate(h.date)}
@@ -77,6 +77,10 @@ export function HistoryPanel({ history, setHistory }: Props) {
                             Today
                           </span>
                         )}
+                      </span>
+                      <span className="col-span-2 text-xs tabular-nums">
+                        <span className="text-muted-foreground">New </span>
+                        <span className="font-medium text-primary">{h.newCasesAdded ?? 0}</span>
                       </span>
                       <span className="col-span-2 text-xs tabular-nums">
                         <span className="text-muted-foreground">Cases </span>
@@ -90,10 +94,11 @@ export function HistoryPanel({ history, setHistory }: Props) {
                         <span className="text-muted-foreground">Hrs </span>
                         <span className="font-medium">{h.hoursWorked.toFixed(2)}</span>
                       </span>
-                      <span className="col-span-2 text-xs tabular-nums">
+                      <span className="col-span-1 text-xs tabular-nums">
                         <span className="text-muted-foreground">PTO </span>
                         <span className="font-medium">{h.ptoUsed}h</span>
                       </span>
+
                       <span className="col-span-1 flex items-center justify-end gap-1">
                         {(["touched", "working", "other", "closed"] as const).map((s) =>
                           h.byStatus[s] > 0 ? (
