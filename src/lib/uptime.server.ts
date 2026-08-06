@@ -15,6 +15,7 @@ export interface UptimeSnapshot {
   title: string;
   description: string | null;
   statusPageUrl: string;
+  dashboardUrl: string;
   monitors: UptimeMonitor[];
   upCount: number;
   downCount: number;
@@ -124,6 +125,7 @@ async function fetchViaMetrics(base: string, apiKey: string): Promise<UptimeSnap
     title: "Uptime Kuma",
     description: "Live data read through the Uptime Kuma API key.",
     statusPageUrl: `${base}/dashboard`,
+    dashboardUrl: `${base}/dashboard`,
     monitors,
     upCount: monitors.filter((m) => m.status === "up").length,
     downCount: monitors.filter((m) => m.status === "down").length,
@@ -193,6 +195,7 @@ export async function fetchStatusPage(baseUrl: string, slug: string): Promise<Up
     title: page?.config?.title ?? "Status page",
     description: page?.config?.description ?? null,
     statusPageUrl: `${base}/status/${safeSlug}`,
+    dashboardUrl: `${base}/dashboard`,
     monitors,
     upCount: monitors.filter((m) => m.status === "up").length,
     downCount: monitors.filter((m) => m.status === "down").length,
