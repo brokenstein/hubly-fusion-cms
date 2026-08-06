@@ -326,7 +326,14 @@ function DevicesPage() {
                 )}
               </div>
 
+              {device.notes && (
+                <div className="mb-4 whitespace-pre-wrap rounded-lg border border-border/60 bg-secondary/40 p-3 text-xs text-muted-foreground">
+                  {device.notes}
+                </div>
+              )}
+
               <h3 className="mb-3 text-sm font-medium text-muted-foreground">Software Versions</h3>
+
 
               <div className="overflow-hidden rounded-lg bg-secondary/50">
                 {device.software_versions.length > 0 ? (
