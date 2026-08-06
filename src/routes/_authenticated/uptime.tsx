@@ -399,21 +399,21 @@ function PreviewCard({ snapshot }: { snapshot: UptimeSnapshot }) {
           </a>
         </Button>
       </div>
-      {target === "dashboard" && (
-        <p className="border-b border-border bg-secondary/50 px-4 py-2 text-xs text-muted-foreground">
-          The Uptime Kuma dashboard is private. Sign in once at{" "}
-          <a
-            href={snapshot.dashboardUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="text-primary hover:underline"
-          >
-            {snapshot.dashboardUrl.replace(/^https?:\/\//, "")}
-          </a>{" "}
-          in this browser and it will load here with your session. If it stays blank, Uptime Kuma
-          is blocking embedding — use the Status page tab or the monitor cards below.
-        </p>
-      )}
+      <p className="border-b border-border bg-secondary/50 px-4 py-2 text-xs text-muted-foreground">
+        {target === "dashboard"
+          ? "The Uptime Kuma dashboard is private — sign in once at "
+          : "If the frame stays blank, that Uptime Kuma server blocks embedding (X-Frame-Options). Open it directly at "}
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-primary hover:underline"
+        >
+          {url.replace(/^https?:\/\//, "")}
+        </a>
+        {" "}
+        in this browser. Either way the live monitor cards below always show current data.
+      </p>
       <iframe
         key={url}
         src={url}
