@@ -242,9 +242,11 @@ function CasesPage() {
         />
       </section>
 
-      <section>
+      <section className="space-y-6">
+        <NewCasesLog history={history} today={today} todayCount={newCasesCount} />
         <HistoryPanel history={history} setHistory={setHistory} />
       </section>
+
     </div>
   );
 }
