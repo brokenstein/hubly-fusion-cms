@@ -327,6 +327,7 @@ function DevicesPage() {
               </div>
 
               <h3 className="mb-3 text-sm font-medium text-muted-foreground">Software Versions</h3>
+
               <div className="overflow-hidden rounded-lg bg-secondary/50">
                 {device.software_versions.length > 0 ? (
                   <table className="w-full table-fixed text-sm">
