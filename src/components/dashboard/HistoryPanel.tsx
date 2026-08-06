@@ -68,7 +68,7 @@ export function HistoryPanel({ history, setHistory }: Props) {
                   <div key={h.date} className="rounded-md border border-border/60 bg-secondary/40">
                     <button
                       onClick={() => setExpanded(isOpen ? null : h.date)}
-                      className="grid w-full grid-cols-12 items-center gap-2 rounded-md p-2.5 text-left transition hover:bg-secondary/60"
+                      className="grid w-full grid-cols-13 items-center gap-2 rounded-md p-2.5 text-left transition hover:bg-secondary/60"
                     >
                       <span className="col-span-3 flex items-center gap-2 text-sm font-medium">
                         {fmtDate(h.date)}
