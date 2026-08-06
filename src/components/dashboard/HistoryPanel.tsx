@@ -79,6 +79,10 @@ export function HistoryPanel({ history, setHistory }: Props) {
                         )}
                       </span>
                       <span className="col-span-2 text-xs tabular-nums">
+                        <span className="text-muted-foreground">New </span>
+                        <span className="font-medium text-primary">{h.newCasesAdded ?? 0}</span>
+                      </span>
+                      <span className="col-span-2 text-xs tabular-nums">
                         <span className="text-muted-foreground">Cases </span>
                         <span className="font-medium">{h.caseCount}</span>
                       </span>
@@ -90,10 +94,11 @@ export function HistoryPanel({ history, setHistory }: Props) {
                         <span className="text-muted-foreground">Hrs </span>
                         <span className="font-medium">{h.hoursWorked.toFixed(2)}</span>
                       </span>
-                      <span className="col-span-2 text-xs tabular-nums">
+                      <span className="col-span-1 text-xs tabular-nums">
                         <span className="text-muted-foreground">PTO </span>
                         <span className="font-medium">{h.ptoUsed}h</span>
                       </span>
+
                       <span className="col-span-1 flex items-center justify-end gap-1">
                         {(["touched", "working", "other", "closed"] as const).map((s) =>
                           h.byStatus[s] > 0 ? (
