@@ -583,7 +583,9 @@ function EditDeviceDialog({
           os: form.os,
           image_url: form.image_url || null,
           download_url: form.download_url || null,
+          notes: form.notes.trim() || null,
           platform_id: form.platform_id === UNASSIGNED ? null : form.platform_id,
+
         })
         .eq("id", device.id);
       if (error) throw error;
