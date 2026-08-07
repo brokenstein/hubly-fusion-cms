@@ -371,55 +371,131 @@ function AddSiteDialog() {
 }
 
 /**
- * Inline preview of either the public status page or the full Uptime Kuma
- * dashboard. The dashboard requires a login: sign in to Uptime Kuma in this
- * browser once and the embedded view uses that same session.
+ * Native live status board built from the Uptime Kuma API data we already
+ * fetch server-side — no iframe, so it works even though Uptime Kuma blocks
+ * embedding.
  */
 function PreviewCard({ snapshot }: { snapshot: UptimeSnapshot }) {
-  const [target, setTarget] = useState<"status" | "dashboard">("status");
-  const url = target === "status" ? snapshot.statusPageUrl : snapshot.dashboardUrl;
+  const monitors = snapshot.monitors;
+  const total = monitors.length;
+  const uptimes = monitors.map((m) => m.uptime24h).filter((u): u is number => u !== null);
+  const pings = monitors.map((m) => m.avgPing).filter((p): p is number => p !== null);
+  const avgUptime = uptimes.length ? uptimes.reduce((a, b) => a + b, 0) / uptimes.length : null;
+  const avgPing = pings.length
+    ? Math.round(pings.reduce((a, b) => a + b, 0) / pings.length)
+    : null;
+  const health = total ? Math.round((snapshot.upCount / total) * 100) : 0;
+
+  const stats = [
+    { label: "Monitors", value: String(total) },
+    { label: "Up", value: String(snapshot.upCount), tone: "text-primary" },
+    {
+      label: "Down",
+      value: String(snapshot.downCount),
+      tone: snapshot.downCount > 0 ? "text-destructive" : undefined,
+    },
+    { label: "Avg uptime 24h", value: avgUptime !== null ? `${avgUptime.toFixed(2)}%` : "—" },
+    { label: "Avg response", value: avgPing !== null ? `${avgPing} ms` : "—" },
+  ];
 
   return (
     <Card className="overflow-hidden p-0">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2">
-        <div className="flex items-center gap-3">
-          <Tabs value={target} onValueChange={(v) => setTarget(v as "status" | "dashboard")}>
-            <TabsList>
-              <TabsTrigger value="status">Status page</TabsTrigger>
-              <TabsTrigger value="dashboard">Dashboard (login)</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <p className="text-xs font-medium text-muted-foreground">
-            {url.replace(/^https?:\/\//, "")}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3">
+        <div>
+          <h3 className="text-sm font-semibold">Live status board</h3>
+          <p className="text-xs text-muted-foreground">
+            Built directly from the Uptime Kuma API · refreshes every minute
           </p>
         </div>
         <Button asChild variant="ghost" size="sm">
-          <a href={url} target="_blank" rel="noreferrer">
-            Open <ArrowUpRight className="ml-1 size-3.5" />
+          <a href={snapshot.dashboardUrl} target="_blank" rel="noreferrer">
+            Open Uptime Kuma <ArrowUpRight className="ml-1 size-3.5" />
           </a>
         </Button>
       </div>
-      <p className="border-b border-border bg-secondary/50 px-4 py-2 text-xs text-muted-foreground">
-        {target === "dashboard"
-          ? "The Uptime Kuma dashboard is private — sign in once at "
-          : "If the frame stays blank, that Uptime Kuma server blocks embedding (X-Frame-Options). Open it directly at "}
-        <a
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-          className="text-primary hover:underline"
-        >
-          {url.replace(/^https?:\/\//, "")}
-        </a>
-        {" "}
-        in this browser. Either way the live monitor cards below always show current data.
-      </p>
-      <iframe
-        key={url}
-        src={url}
-        title={`${snapshot.title} ${target === "status" ? "status page" : "dashboard"}`}
-        className="h-[70vh] w-full border-0 bg-background"
-      />
+
+      <div className="grid grid-cols-2 divide-border border-b border-border sm:grid-cols-5 sm:divide-x">
+        {stats.map((s) => (
+          <div key={s.label} className="px-5 py-4">
+            <p className="text-xs text-muted-foreground">{s.label}</p>
+            <p className={`text-xl font-semibold tabular-nums ${s.tone ?? ""}`}>{s.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-1.5 px-5 py-4">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>Overall health</span>
+          <span className="font-medium tabular-nums text-foreground">{health}%</span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-secondary">
+          <div
+            className={`h-full rounded-full transition-all ${
+              snapshot.downCount > 0 ? "bg-destructive" : "bg-primary"
+            }`}
+            style={{ width: `${health}%` }}
+          />
+        </div>
+      </div>
+
+      {total > 0 && (
+        <div className="divide-y divide-border border-t border-border">
+          {monitors.map((monitor) => (
+            <div
+              key={`board-${monitor.id}`}
+              className="flex flex-wrap items-center gap-3 px-5 py-2.5 text-sm"
+            >
+              <span
+                aria-hidden
+                className={`size-2 shrink-0 rounded-full ${
+                  monitor.status === "up"
+                    ? "bg-primary"
+                    : monitor.status === "down"
+                      ? "bg-destructive"
+                      : "bg-muted-foreground"
+                }`}
+              />
+              <span className="min-w-40 flex-1 truncate font-medium">{monitor.name}</span>
+              <span className="hidden min-w-28 text-xs text-muted-foreground sm:block">
+                {monitor.groupName}
+              </span>
+              <span className="flex h-5 w-32 shrink-0 items-end gap-0.5">
+                {monitor.beats.slice(-24).map((beat, i) => (
+                  <span
+                    key={`board-${monitor.id}-${i}`}
+                    title={`${beat.time}${beat.ping ? ` · ${beat.ping} ms` : ""}`}
+                    className={`h-full flex-1 rounded-sm ${
+                      beat.status === 1
+                        ? "bg-primary/70"
+                        : beat.status === 0
+                          ? "bg-destructive"
+                          : "bg-muted"
+                    }`}
+                  />
+                ))}
+              </span>
+              <span className="w-20 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+                {monitor.uptime24h !== null ? `${monitor.uptime24h.toFixed(2)}%` : "—"}
+              </span>
+              <span className="w-16 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+                {monitor.avgPing !== null ? `${monitor.avgPing} ms` : "—"}
+              </span>
+              <Badge
+                variant={
+                  monitor.status === "up"
+                    ? "secondary"
+                    : monitor.status === "down"
+                      ? "destructive"
+                      : "outline"
+                }
+              >
+                {monitor.status}
+              </Badge>
+            </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 }
+

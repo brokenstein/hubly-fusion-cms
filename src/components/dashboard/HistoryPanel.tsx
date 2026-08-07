@@ -8,11 +8,15 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDown, History, Trash2 } from "lucide-react";
 import { STATUS_META, type DayHistory } from "@/lib/case-types";
+import { NewCasesLog } from "./NewCasesLog";
 
 interface Props {
   history: DayHistory[];
   setHistory: (h: DayHistory[]) => void;
+  today?: string;
+  todayNewCases?: number;
 }
+
 
 function fmtDate(d: string) {
   const dt = new Date(d + "T00:00:00");
@@ -23,10 +27,11 @@ function fmtDate(d: string) {
   });
 }
 
-export function HistoryPanel({ history, setHistory }: Props) {
+export function HistoryPanel({ history, setHistory, today: todayProp, todayNewCases = 0 }: Props) {
   const [open, setOpen] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayProp ?? new Date().toISOString().slice(0, 10);
+
 
   const sorted = [...history].sort((a, b) => (a.date < b.date ? 1 : -1));
 
@@ -55,6 +60,15 @@ export function HistoryPanel({ history, setHistory }: Props) {
         </div>
         <CollapsibleContent>
           <div className="px-6 pb-6">
+            {todayProp && (
+              <NewCasesLog
+                history={history}
+                today={todayProp}
+                todayCount={todayNewCases}
+                embedded
+              />
+            )}
+
             {sorted.length === 0 && (
               <p className="py-6 text-center text-sm text-muted-foreground">
                 No history yet. Today's stats will appear here automatically.

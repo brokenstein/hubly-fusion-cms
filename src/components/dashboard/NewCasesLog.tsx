@@ -7,7 +7,10 @@ interface Props {
   history: DayHistory[];
   today: string;
   todayCount: number;
+  /** Render without the surrounding Card, for embedding in another panel. */
+  embedded?: boolean;
 }
+
 
 function fmtDate(d: string) {
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
@@ -27,7 +30,7 @@ function shiftDay(key: string, days: number) {
 }
 
 /** Rolling log of how many brand-new cases were added each day. */
-export function NewCasesLog({ history, today, todayCount }: Props) {
+export function NewCasesLog({ history, today, todayCount, embedded = false }: Props) {
   if (!today) return null;
 
   const byDate = new Map<string, number>();
@@ -41,13 +44,13 @@ export function NewCasesLog({ history, today, todayCount }: Props) {
   const week = rows.slice(0, 7).reduce((s, r) => s + r.count, 0);
   const twoWeeks = rows.reduce((s, r) => s + r.count, 0);
 
-  return (
-    <Card className="space-y-4 p-6">
+  const body = (
+    <>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <CalendarPlus className="h-4 w-4 text-muted-foreground" />
           <div>
-            <h2 className="text-base font-semibold leading-tight">New cases log</h2>
+            <h2 className="text-sm font-semibold leading-tight">New cases log</h2>
             <p className="text-xs text-muted-foreground">
               New cases added each day · auto-logged
             </p>
@@ -83,6 +86,17 @@ export function NewCasesLog({ history, today, todayCount }: Props) {
           </div>
         ))}
       </div>
-    </Card>
+    </>
   );
+
+  if (embedded) {
+    return (
+      <div className="mb-4 space-y-4 rounded-lg border border-border/60 bg-secondary/30 p-4">
+        {body}
+      </div>
+    );
+  }
+
+  return <Card className="space-y-4 p-6">{body}</Card>;
 }
+

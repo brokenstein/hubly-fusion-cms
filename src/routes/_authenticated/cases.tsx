@@ -9,7 +9,7 @@ import { TimeCardPanel } from "@/components/dashboard/TimeCardPanel";
 import { PtoPanel } from "@/components/dashboard/PtoPanel";
 import { DailyInfoPanel } from "@/components/dashboard/DailyInfoPanel";
 import { HistoryPanel } from "@/components/dashboard/HistoryPanel";
-import { NewCasesLog } from "@/components/dashboard/NewCasesLog";
+
 import { NewCasesCounter } from "@/components/dashboard/NewCasesCounter";
 
 import type { CaseEntry, DayHistory, PtoEntry, PunchEntry } from "@/lib/case-types";
@@ -245,9 +245,14 @@ function CasesPage() {
       </section>
 
       <section className="space-y-6">
-        <NewCasesLog history={history} today={today} todayCount={newCasesCount} />
-        <HistoryPanel history={history} setHistory={setHistory} />
+        <HistoryPanel
+          history={history}
+          setHistory={setHistory}
+          today={today}
+          todayNewCases={newCasesCount}
+        />
       </section>
+
 
     </div>
   );
