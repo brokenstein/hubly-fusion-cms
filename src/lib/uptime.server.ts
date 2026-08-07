@@ -193,7 +193,8 @@ async function fetchViaMetrics(base: string, apiKey: string): Promise<UptimeSnap
 export async function fetchStatusPage(baseUrl: string, slug: string): Promise<UptimeSnapshot> {
   const base = normalizeBase(baseUrl);
   const safeSlug = encodeURIComponent(slug.trim() || "default");
-  const apiKey = process.env["UPTIME_KUMA_API_KEY"];
+  // Only ever send the shared API key to a trusted, configured Kuma host.
+  const apiKey = isTrustedHost(base) ? process.env["UPTIME_KUMA_API_KEY"] : undefined;
 
   let page: any;
   let heartbeat: any;
