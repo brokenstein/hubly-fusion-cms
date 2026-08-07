@@ -9,7 +9,7 @@ import { TimeCardPanel } from "@/components/dashboard/TimeCardPanel";
 import { PtoPanel } from "@/components/dashboard/PtoPanel";
 import { DailyInfoPanel } from "@/components/dashboard/DailyInfoPanel";
 import { HistoryPanel } from "@/components/dashboard/HistoryPanel";
-import { NewCasesLog } from "@/components/dashboard/NewCasesLog";
+
 import { NewCasesCounter } from "@/components/dashboard/NewCasesCounter";
 
 import type { CaseEntry, DayHistory, PtoEntry, PunchEntry } from "@/lib/case-types";
