@@ -12,7 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  server: {
-    allowedHosts: ["players.hypersonic.network"],
+  vite: {
+    server: {
+      allowedHosts: ["players.hypersonic.network"],
+    },
   },
 });
