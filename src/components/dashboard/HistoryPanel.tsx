@@ -8,11 +8,15 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDown, History, Trash2 } from "lucide-react";
 import { STATUS_META, type DayHistory } from "@/lib/case-types";
+import { NewCasesLog } from "./NewCasesLog";
 
 interface Props {
   history: DayHistory[];
   setHistory: (h: DayHistory[]) => void;
+  today?: string;
+  todayNewCases?: number;
 }
+
 
 function fmtDate(d: string) {
   const dt = new Date(d + "T00:00:00");
