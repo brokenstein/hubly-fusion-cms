@@ -22,6 +22,61 @@ export interface UptimeSnapshot {
   fetchedAt: string;
 }
 
+// Hosts the shared UPTIME_KUMA_API_KEY may ever be sent to. Anything else is
+// fetched anonymously (public status page only), so a user-supplied URL can
+// never exfiltrate the shared secret.
+const DEFAULT_TRUSTED_HOSTS = ["opskit.hypersonic.network"];
+
+function trustedHosts(): string[] {
+  const extra = (process.env["UPTIME_KUMA_ALLOWED_HOSTS"] ?? "")
+    .split(",")
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean);
+  return [...DEFAULT_TRUSTED_HOSTS, ...extra];
+}
+
+function isTrustedHost(base: string): boolean {
+  try {
+    const host = new URL(base).hostname.toLowerCase();
+    return trustedHosts().some((h) => host === h || host.endsWith(`.${h}`));
+  } catch {
+    return false;
+  }
+}
+
+// Block internal / link-local / metadata targets to prevent SSRF.
+function assertPublicHost(hostname: string) {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (
+    host === "localhost" ||
+    host === "0.0.0.0" ||
+    host.endsWith(".localhost") ||
+    host.endsWith(".local") ||
+    host.endsWith(".internal") ||
+    host === "metadata.google.internal"
+  ) {
+    throw new Error("That host is not allowed");
+  }
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) {
+    const [a, b] = host.split(".").map(Number) as [number, number];
+    if (
+      a === 10 ||
+      a === 127 ||
+      a === 0 ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 100 && b >= 64 && b <= 127) ||
+      a >= 224
+    ) {
+      throw new Error("That host is not allowed");
+    }
+  }
+  if (host === "::1" || host.startsWith("fc") || host.startsWith("fd") || host.startsWith("fe80")) {
+    throw new Error("That host is not allowed");
+  }
+}
+
 export function normalizeBase(raw: string): string {
   const trimmed = raw.trim().replace(/\/+$/, "");
   const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
@@ -29,6 +84,7 @@ export function normalizeBase(raw: string): string {
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw new Error("Only http and https URLs are supported");
   }
+  assertPublicHost(url.hostname);
   // Strip Uptime Kuma app paths so we never build /dashboard/dashboard or
   // /status/x/status/x when the user pastes a dashboard or status page URL.
   const path = url.pathname
@@ -38,6 +94,7 @@ export function normalizeBase(raw: string): string {
     .replace(/\/+$/, "");
   return `${url.origin}${path}`;
 }
+
 
 function statusFromBeat(code: number | undefined): UptimeMonitor["status"] {
   switch (code) {
