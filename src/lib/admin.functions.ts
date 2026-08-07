@@ -10,19 +10,23 @@ export interface WorkspaceUser {
   isAdmin: boolean;
 }
 
-async function assertAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase.rpc("has_role", {
-    _user_id: userId,
-    _role: "admin",
-  });
-  if (error) throw new Error(error.message);
+async function assertAdmin(userId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) throw new Error("Unable to verify permissions");
   if (!data) throw new Error("Forbidden: admin access required");
 }
+
 
 export const listWorkspaceUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<WorkspaceUser[]> => {
-    await assertAdmin(context.supabase, context.userId);
+    await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: users, error } = await supabaseAdmin.auth.admin.listUsers({ perPage: 200 });
@@ -49,7 +53,7 @@ export const setUserAdmin = createServerFn({ method: "POST" })
     z.object({ userId: z.string().uuid(), isAdmin: z.boolean() }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.userId);
+    await assertAdmin(context.userId);
     if (data.userId === context.userId && !data.isAdmin) {
       throw new Error("You cannot remove your own admin access");
     }
