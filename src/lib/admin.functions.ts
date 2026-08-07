@@ -26,7 +26,7 @@ async function assertAdmin(userId: string) {
 export const listWorkspaceUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<WorkspaceUser[]> => {
-    await assertAdmin(context.supabase, context.userId);
+    await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: users, error } = await supabaseAdmin.auth.admin.listUsers({ perPage: 200 });
@@ -53,7 +53,7 @@ export const setUserAdmin = createServerFn({ method: "POST" })
     z.object({ userId: z.string().uuid(), isAdmin: z.boolean() }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.userId);
+    await assertAdmin(context.userId);
     if (data.userId === context.userId && !data.isAdmin) {
       throw new Error("You cannot remove your own admin access");
     }
