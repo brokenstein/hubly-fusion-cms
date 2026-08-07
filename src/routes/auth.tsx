@@ -73,24 +73,28 @@ function AuthPage() {
   }
 
   async function google() {
-    // The managed OAuth broker lives behind Lovable's hosting proxy (/~oauth/*).
-    // On a local clone or self-hosted origin those paths don't exist, which is
-    // why sign-in landed on a 404 page. Use the backend's own OAuth flow there.
+    // The managed OAuth broker only exists behind Lovable's hosting proxy
+    // (/~oauth/*). On a self-hosted origin such as players.hypersonic.network
+    // that path 404s, so use the backend's own Google OAuth flow instead.
     const host = window.location.hostname;
-    const isLovableHosted = host.endsWith(".lovable.app") || host.endsWith(".lovable.dev");
+    const isLovableHosted =
+      host.endsWith(".lovable.app") ||
+      host.endsWith(".lovable.dev") ||
+      host.endsWith(".lovableproject.com");
 
     if (!isLovableHosted) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: window.location.origin },
+        options: { redirectTo: `${window.location.origin}/auth` },
       });
       if (error) {
         toast.error(
-          `Google sign-in failed: ${error.message}. Add ${window.location.origin} to the allowed redirect URLs in your backend auth settings.`,
+          `Google sign-in failed: ${error.message}. Add ${window.location.origin}/auth to the allowed redirect URLs in your backend auth settings.`,
         );
       }
       return;
     }
+
 
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
