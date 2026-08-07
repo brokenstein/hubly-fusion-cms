@@ -27,10 +27,11 @@ function fmtDate(d: string) {
   });
 }
 
-export function HistoryPanel({ history, setHistory }: Props) {
+export function HistoryPanel({ history, setHistory, today: todayProp, todayNewCases = 0 }: Props) {
   const [open, setOpen] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayProp ?? new Date().toISOString().slice(0, 10);
+
 
   const sorted = [...history].sort((a, b) => (a.date < b.date ? 1 : -1));
 
