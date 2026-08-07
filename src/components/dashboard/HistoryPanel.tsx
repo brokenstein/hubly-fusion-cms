@@ -60,6 +60,15 @@ export function HistoryPanel({ history, setHistory, today: todayProp, todayNewCa
         </div>
         <CollapsibleContent>
           <div className="px-6 pb-6">
+            {todayProp && (
+              <NewCasesLog
+                history={history}
+                today={todayProp}
+                todayCount={todayNewCases}
+                embedded
+              />
+            )}
+
             {sorted.length === 0 && (
               <p className="py-6 text-center text-sm text-muted-foreground">
                 No history yet. Today's stats will appear here automatically.
