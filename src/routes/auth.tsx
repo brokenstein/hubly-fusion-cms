@@ -4,12 +4,13 @@ import { toast } from "sonner";
 import { Loader2, LayoutGrid } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
+import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GoogleIcon } from "@/components/icons/GoogleIcon";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
