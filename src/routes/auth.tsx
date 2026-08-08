@@ -88,11 +88,13 @@ function AuthPage() {
         options: { redirectTo: `${window.location.origin}/auth` },
       });
       if (error) {
-        toast.error(
-          `Google sign-in failed: ${error.message}. Add ${window.location.origin}/auth to the allowed redirect URLs in your backend auth settings.`,
-        );
+        const msg = /missing oauth secret|unsupported provider/i.test(error.message)
+          ? "Google sign-in isn't configured for this domain. Add your own Google OAuth client ID and secret in the backend auth settings (Users → Auth Settings → Google), then add this origin to the allowed redirect URLs."
+          : `Google sign-in failed: ${error.message}. Add ${window.location.origin}/auth to the allowed redirect URLs in your backend auth settings.`;
+        toast.error(msg);
       }
       return;
+
     }
 
 
