@@ -68,7 +68,7 @@ function Landing() {
             single login and one shared database.
           </p>
 
-          <div className="mt-8 flex justify-center gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
               <Link to="/auth">
                 Open workspace <ArrowRight className="size-4" />
@@ -76,6 +76,12 @@ function Landing() {
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link to="/auth">Create an account</Link>
+            </Button>
+          </div>
+          <div className="mt-3 flex justify-center">
+            <Button size="lg" variant="outline" className="gap-2" onClick={google}>
+              <GoogleIcon className="size-4" />
+              Continue with Google
             </Button>
           </div>
         </div>
