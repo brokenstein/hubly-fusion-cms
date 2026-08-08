@@ -183,7 +183,8 @@ function AuthPage() {
             <span className="h-px flex-1 bg-border" />
           </div>
 
-          <Button variant="outline" className="w-full" onClick={google}>
+          <Button variant="outline" className="w-full gap-2" onClick={google}>
+            <GoogleIcon className="size-4" />
             Continue with Google
           </Button>
         </div>
