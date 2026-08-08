@@ -51,6 +51,8 @@ const modules = [
 
 
 function Landing() {
+  const google = useGoogleSignIn();
+
   return (
     <main className="min-h-screen">
       <section className="relative overflow-hidden border-b border-border surface-grid">
