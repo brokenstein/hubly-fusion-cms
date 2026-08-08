@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ClipboardList, MonitorSmartphone, Activity, Link2, ArrowRight } from "lucide-react";
 
+import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
 import { Button } from "@/components/ui/button";
+import { GoogleIcon } from "@/components/icons/GoogleIcon";
 
 export const Route = createFileRoute("/")({
   head: () => ({
