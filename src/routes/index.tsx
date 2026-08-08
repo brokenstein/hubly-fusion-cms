@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ClipboardList, MonitorSmartphone, Activity, Link2, ArrowRight } from "lucide-react";
 
+import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
 import { Button } from "@/components/ui/button";
+import { GoogleIcon } from "@/components/icons/GoogleIcon";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -49,6 +51,8 @@ const modules = [
 
 
 function Landing() {
+  const google = useGoogleSignIn();
+
   return (
     <main className="min-h-screen">
       <section className="relative overflow-hidden border-b border-border surface-grid">
@@ -64,7 +68,7 @@ function Landing() {
             single login and one shared database.
           </p>
 
-          <div className="mt-8 flex justify-center gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
               <Link to="/auth">
                 Open workspace <ArrowRight className="size-4" />
@@ -72,6 +76,12 @@ function Landing() {
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link to="/auth">Create an account</Link>
+            </Button>
+          </div>
+          <div className="mt-3 flex justify-center">
+            <Button size="lg" variant="outline" className="gap-2" onClick={google}>
+              <GoogleIcon className="size-4" />
+              Continue with Google
             </Button>
           </div>
         </div>
