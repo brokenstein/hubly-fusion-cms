@@ -4,8 +4,15 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
-export function useGoogleSignIn() {
+/** Only same-origin relative paths are safe redirect targets. */
+export function safeNext(next?: string | null) {
+  if (!next || !next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
+
+export function useGoogleSignIn(next?: string | null) {
   const navigate = useNavigate();
+  const target = safeNext(next);
 
   async function signInWithGoogle() {
     const host = window.location.hostname;
@@ -15,9 +22,12 @@ export function useGoogleSignIn() {
       host.endsWith(".lovableproject.com");
 
     if (!isLovableHosted) {
+      const redirectTo = target
+        ? `${window.location.origin}/auth?next=${encodeURIComponent(target)}`
+        : `${window.location.origin}/auth`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/auth` },
+        options: { redirectTo },
       });
       if (error) {
         const msg = /missing oauth secret|unsupported provider/i.test(error.message)
@@ -29,13 +39,17 @@ export function useGoogleSignIn() {
     }
 
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: target ? `${window.location.origin}${target}` : window.location.origin,
     });
     if (result.error) {
       toast.error("Google sign-in failed. Please try again.");
       return;
     }
     if (result.redirected) return;
+    if (target) {
+      window.location.href = target;
+      return;
+    }
     navigate({ to: "/dashboard" });
   }
 

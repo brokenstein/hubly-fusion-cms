@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://qtdejbizjdepwsvjseyv.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "omnihub-cms",
+      "version": "0.1.0",
+      "title": "OmniHub CMS"
+    },
+    "tools": [
+      {
+        "name": "list_devices",
+        "title": "List devices",
+        "description": "List the signed-in user's Device Hub devices with their platform group and approved software versions.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "platform": {
+              "description": "Filter by platform/group name, e.g. VSN or ABN.",
+              "type": "string"
+            },
+            "limit": {
+              "default": 100,
+              "description": "Maximum devices to return.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_device",
+        "title": "Update device",
+        "description": "Update the name, model, OS, notes or download URL of one of the user's devices.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Device id (from list_devices)."
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model": {
+              "type": "string"
+            },
+            "os": {
+              "type": "string"
+            },
+            "notes": {
+              "description": "Free-form notes shown on the device card.",
+              "type": "string"
+            },
+            "download_url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_cases",
+        "title": "List tracked cases",
+        "description": "Read the signed-in user's Case Tracker entries, including status and minutes worked, from the workspace state.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Filter by case status.",
+              "type": "string",
+              "enum": [
+                "open",
+                "pending",
+                "closed"
+              ]
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_brand_kits",
+        "title": "List brand kits",
+        "description": "List the signed-in user's brand kits with palettes, fonts and logo URLs.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "search": {
+              "description": "Filter by brand name substring.",
+              "type": "string"
+            },
+            "limit": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_roi_deals",
+        "title": "List ROI deals",
+        "description": "List the signed-in user's saved ROI calculator deals with their inputs and computed results.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "search": {
+              "description": "Filter by deal or company name substring.",
+              "type": "string"
+            },
+            "limit": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_uptime_sites",
+        "title": "List uptime monitors",
+        "description": "List the Uptime Kuma instances the signed-in user has connected to the workspace.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

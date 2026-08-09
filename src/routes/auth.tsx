@@ -5,7 +5,7 @@ import { Loader2, LayoutGrid } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
+import { useGoogleSignIn, safeNext } from "@/hooks/useGoogleSignIn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>): { next?: string } =>
+    typeof s['next'] === "string" ? { next: s['next'] } : {},
   head: () => ({
     meta: [
       { title: "Sign in — OpsKit workspace" },
@@ -33,15 +35,26 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
-  const google = useGoogleSignIn();
+  const { next } = Route.useSearch();
+  const target = safeNext(next);
+  const google = useGoogleSignIn(target);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [busy, setBusy] = useState(false);
 
+  function goAfterAuth() {
+    if (target) {
+      window.location.href = target;
+      return;
+    }
+    navigate({ to: "/dashboard" });
+  }
+
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/dashboard" });
-  }, [loading, session, navigate]);
+    if (!loading && session) goAfterAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, session]);
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
@@ -52,7 +65,7 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
-    navigate({ to: "/dashboard" });
+    goAfterAuth();
   }
 
   async function signUp(e: React.FormEvent) {
@@ -62,7 +75,7 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}${target ?? "/dashboard"}`,
         data: { full_name: fullName },
       },
     });
@@ -73,6 +86,7 @@ function AuthPage() {
     }
     toast.success("Account created. Check your inbox if confirmation is required.");
   }
+
 
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
