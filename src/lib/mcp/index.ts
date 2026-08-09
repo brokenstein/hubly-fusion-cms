@@ -21,5 +21,7 @@ export default defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [listDevices, updateDevice, listCases, listBrandKits, listRoiDeals, listUptimeSites],
+  // Casted: these tools omit `outputSchema`, which the SDK type marks required under
+  // the project's exactOptionalPropertyTypes setting.
+  tools: [listDevices, updateDevice, listCases, listBrandKits, listRoiDeals, listUptimeSites] as never,
 });
