@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { listWorkspaceUsers, setUserAdmin, type WorkspaceUser } from "@/lib/admin.functions";
+import { listWorkspaceUsers, setUserAdmin, type WorkspaceUser } from "@/lib/admin-users";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -32,19 +31,16 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const queryClient = useQueryClient();
   const { isAdmin, loading } = useIsAdmin();
-  const fetchUsers = useServerFn(listWorkspaceUsers);
-  const updateAdmin = useServerFn(setUserAdmin);
 
   const users = useQuery({
     queryKey: ["workspace_users"],
-    queryFn: async (): Promise<WorkspaceUser[]> => fetchUsers({ data: undefined as never }),
+    queryFn: async (): Promise<WorkspaceUser[]> => listWorkspaceUsers(),
     enabled: isAdmin,
     retry: false,
   });
 
   const toggle = useMutation({
-    mutationFn: async (vars: { userId: string; isAdmin: boolean }) =>
-      updateAdmin({ data: vars }),
+    mutationFn: async (vars: { userId: string; isAdmin: boolean }) => setUserAdmin(vars),
     onSuccess: () => {
       toast.success("Admin access updated");
       queryClient.invalidateQueries({ queryKey: ["workspace_users"] });
