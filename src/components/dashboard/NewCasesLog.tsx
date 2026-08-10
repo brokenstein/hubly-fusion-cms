@@ -1,6 +1,12 @@
-import { CalendarPlus } from "lucide-react";
+import { useState } from "react";
+import { CalendarPlus, ChevronDown } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import type { DayHistory } from "@/lib/case-types";
 
 interface Props {
