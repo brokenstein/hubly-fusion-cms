@@ -194,10 +194,12 @@ function DevicesPage() {
             Registered players, platforms and the software versions they run.
           </p>
         </div>
-        <div className="flex gap-2">
-          <AddPlatformDialog onSubmit={(name) => addPlatform.mutate(name)} />
-          <AddDeviceDialog platforms={platforms.data ?? []} />
-        </div>
+        {isAdmin && (
+          <div className="flex gap-2">
+            <AddPlatformDialog onSubmit={(name) => addPlatform.mutate(name)} />
+            <AddDeviceDialog platforms={platforms.data ?? []} />
+          </div>
+        )}
       </header>
 
       <div className="flex flex-wrap items-center gap-6">
