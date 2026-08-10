@@ -12,10 +12,14 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { WORKSPACE_MODULES, useModules } from "@/hooks/use-modules";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 export function ModuleSettings() {
   const [open, setOpen] = useState(false);
   const { enabled, setModule } = useModules();
+  const { isAdmin } = useIsAdmin();
+
+  if (!isAdmin) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -33,8 +37,8 @@ export function ModuleSettings() {
         <DialogHeader>
           <DialogTitle>Workspace modules</DialogTitle>
           <DialogDescription>
-            Turn sections on or off for your own account. Disabled sections disappear from the
-            sidebar.
+            Admins choose which sections are available to everyone in the workspace. Disabled
+            sections disappear from the sidebar for all users.
           </DialogDescription>
         </DialogHeader>
         <div className="divide-y divide-border">
