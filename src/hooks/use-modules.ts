@@ -67,17 +67,41 @@ export const DEFAULT_MODULE_TOGGLES: ModuleToggles = {
   roi: false,
 };
 
-/** Per-user enabled/disabled state for each workspace module. */
+/**
+ * Workspace-wide enabled/disabled state for each module. Every signed-in user
+ * reads the same list; only admins may change it (enforced by RLS).
+ */
 export function useModules() {
-  const [toggles, setToggles, loaded] = useCloudState<ModuleToggles>(
-    "module_toggles",
-    DEFAULT_MODULE_TOGGLES,
-  );
+  const queryClient = useQueryClient();
 
-  const enabled = { ...DEFAULT_MODULE_TOGGLES, ...(toggles ?? {}) } as ModuleToggles;
+  const query = useQuery({
+    queryKey: ["workspace_modules"],
+    queryFn: async (): Promise<Partial<ModuleToggles>> => {
+      const { data, error } = await supabase.from("workspace_modules").select("key, enabled");
+      if (error) throw error;
+      const map: Partial<ModuleToggles> = {};
+      (data ?? []).forEach((row) => {
+        map[row.key as ModuleKey] = row.enabled;
+      });
+      return map;
+    },
+    staleTime: 30_000,
+  });
 
-  const setModule = (key: ModuleKey, value: boolean) =>
-    setToggles({ ...enabled, [key]: value });
+  const mutation = useMutation({
+    mutationFn: async ({ key, value }: { key: ModuleKey; value: boolean }) => {
+      const { error } = await supabase
+        .from("workspace_modules")
+        .upsert({ key, enabled: value }, { onConflict: "key" });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["workspace_modules"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  return { enabled, setModule, loaded };
+  const enabled = { ...DEFAULT_MODULE_TOGGLES, ...(query.data ?? {}) } as ModuleToggles;
+
+  const setModule = (key: ModuleKey, value: boolean) => mutation.mutate({ key, value });
+
+  return { enabled, setModule, loaded: !query.isLoading };
 }
