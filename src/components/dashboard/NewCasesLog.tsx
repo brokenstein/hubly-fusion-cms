@@ -35,8 +35,9 @@ function shiftDay(key: string, days: number) {
   return `${year}-${month}-${day}`;
 }
 
-/** Rolling log of how many brand-new cases were added each day. */
+/** Rolling log of how many brand-new cases were added each day. Collapsed by default. */
 export function NewCasesLog({ history, today, todayCount, embedded = false }: Props) {
+  const [open, setOpen] = useState(false);
   if (!today) return null;
 
   const byDate = new Map<string, number>();
@@ -51,9 +52,9 @@ export function NewCasesLog({ history, today, todayCount, embedded = false }: Pr
   const twoWeeks = rows.reduce((s, r) => s + r.count, 0);
 
   const body = (
-    <>
+    <Collapsible open={open} onOpenChange={setOpen}>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <CollapsibleTrigger className="flex flex-1 cursor-pointer items-center gap-2 text-left">
           <CalendarPlus className="h-4 w-4 text-muted-foreground" />
           <div>
             <h2 className="text-sm font-semibold leading-tight">New cases log</h2>
@@ -61,7 +62,10 @@ export function NewCasesLog({ history, today, todayCount, embedded = false }: Pr
               New cases added each day · auto-logged
             </p>
           </div>
-        </div>
+          <ChevronDown
+            className={`ml-1 h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          />
+        </CollapsibleTrigger>
         <div className="flex gap-4 text-xs text-muted-foreground">
           <span>
             Last 7 days <span className="font-semibold tabular-nums text-foreground">{week}</span>
@@ -73,36 +77,36 @@ export function NewCasesLog({ history, today, todayCount, embedded = false }: Pr
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        {rows.map((row) => (
-          <div key={row.date} className="flex items-center gap-3">
-            <span className="w-28 shrink-0 text-xs text-muted-foreground">
-              {fmtDate(row.date)}
-              {row.date === today && <span className="ml-1 text-primary">•</span>}
-            </span>
-            <span className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
-              <span
-                className="block h-full rounded-full bg-primary transition-all"
-                style={{ width: `${(row.count / max) * 100}%` }}
-              />
-            </span>
-            <span className="w-8 shrink-0 text-right text-xs font-medium tabular-nums">
-              {row.count}
-            </span>
-          </div>
-        ))}
-      </div>
-    </>
+      <CollapsibleContent>
+        <div className="mt-4 space-y-1.5">
+          {rows.map((row) => (
+            <div key={row.date} className="flex items-center gap-3">
+              <span className="w-28 shrink-0 text-xs text-muted-foreground">
+                {fmtDate(row.date)}
+                {row.date === today && <span className="ml-1 text-primary">•</span>}
+              </span>
+              <span className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+                <span
+                  className="block h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${(row.count / max) * 100}%` }}
+                />
+              </span>
+              <span className="w-8 shrink-0 text-right text-xs font-medium tabular-nums">
+                {row.count}
+              </span>
+            </div>
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 
   if (embedded) {
     return (
-      <div className="mb-4 space-y-4 rounded-lg border border-border/60 bg-secondary/30 p-4">
-        {body}
-      </div>
+      <div className="mb-4 rounded-lg border border-border/60 bg-secondary/30 p-4">{body}</div>
     );
   }
 
-  return <Card className="space-y-4 p-6">{body}</Card>;
+  return <Card className="p-6">{body}</Card>;
 }
 
