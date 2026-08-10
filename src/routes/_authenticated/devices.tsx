@@ -86,6 +86,7 @@ const UNASSIGNED = "unassigned";
 
 function DevicesPage() {
   const queryClient = useQueryClient();
+  const { isAdmin } = useIsAdmin();
   const [selected, setSelected] = useState<string>("all");
 
   const platforms = useQuery({
