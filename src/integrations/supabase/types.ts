@@ -305,6 +305,27 @@ export type Database = {
         }
         Relationships: []
       }
+      workspace_modules: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
