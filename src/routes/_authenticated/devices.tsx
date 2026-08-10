@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -86,6 +87,7 @@ const UNASSIGNED = "unassigned";
 
 function DevicesPage() {
   const queryClient = useQueryClient();
+  const { isAdmin } = useIsAdmin();
   const [selected, setSelected] = useState<string>("all");
 
   const platforms = useQuery({
@@ -192,10 +194,12 @@ function DevicesPage() {
             Registered players, platforms and the software versions they run.
           </p>
         </div>
-        <div className="flex gap-2">
-          <AddPlatformDialog onSubmit={(name) => addPlatform.mutate(name)} />
-          <AddDeviceDialog platforms={platforms.data ?? []} />
-        </div>
+        {isAdmin && (
+          <div className="flex gap-2">
+            <AddPlatformDialog onSubmit={(name) => addPlatform.mutate(name)} />
+            <AddDeviceDialog platforms={platforms.data ?? []} />
+          </div>
+        )}
       </header>
 
       <div className="flex flex-wrap items-center gap-6">
@@ -261,40 +265,44 @@ function DevicesPage() {
               ) : (
                 <Monitor className="size-20 text-muted-foreground/50" />
               )}
-              <div className="absolute left-2 top-2 flex gap-1">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  aria-label={`Move ${device.name} earlier`}
-                  disabled={index === 0 || reorder.isPending}
-                  className="text-muted-foreground hover:text-foreground"
-                  onClick={() => move(filtered, index, -1)}
-                >
-                  <ArrowLeft className="size-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  aria-label={`Move ${device.name} later`}
-                  disabled={index === filtered.length - 1 || reorder.isPending}
-                  className="text-muted-foreground hover:text-foreground"
-                  onClick={() => move(filtered, index, 1)}
-                >
-                  <ArrowRight className="size-4" />
-                </Button>
-              </div>
-              <div className="absolute right-2 top-2 flex gap-1">
-                <EditDeviceDialog device={device} platforms={platforms.data ?? []} />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  aria-label={`Delete ${device.name}`}
-                  className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                  onClick={() => removeDevice.mutate(device.id)}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
+              {isAdmin && (
+                <div className="absolute left-2 top-2 flex gap-1">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    aria-label={`Move ${device.name} earlier`}
+                    disabled={index === 0 || reorder.isPending}
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={() => move(filtered, index, -1)}
+                  >
+                    <ArrowLeft className="size-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    aria-label={`Move ${device.name} later`}
+                    disabled={index === filtered.length - 1 || reorder.isPending}
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={() => move(filtered, index, 1)}
+                  >
+                    <ArrowRight className="size-4" />
+                  </Button>
+                </div>
+              )}
+              {isAdmin && (
+                <div className="absolute right-2 top-2 flex gap-1">
+                  <EditDeviceDialog device={device} platforms={platforms.data ?? []} />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    aria-label={`Delete ${device.name}`}
+                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => removeDevice.mutate(device.id)}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
+              )}
             </div>
 
 
