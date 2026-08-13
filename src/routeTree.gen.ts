@@ -21,6 +21,8 @@ import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDevicesRouteImport } from './routes/_authenticated/devices'
 import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
+import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
+import { Route as AuthenticatedPdfToolsRouteImport } from './routes/_authenticated/pdf-tools'
 import { Route as AuthenticatedRoiRouteImport } from './routes/_authenticated/roi'
 import { Route as AuthenticatedUptimeRouteImport } from './routes/_authenticated/uptime'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -87,6 +89,16 @@ const AuthenticatedLinksRoute = AuthenticatedLinksRouteImport.update({
   path: '/links',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotesRoute = AuthenticatedNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPdfToolsRoute = AuthenticatedPdfToolsRouteImport.update({
+  id: '/pdf-tools',
+  path: '/pdf-tools',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRoiRoute = AuthenticatedRoiRouteImport.update({
   id: '/roi',
   path: '/roi',
@@ -121,6 +133,8 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/devices': typeof AuthenticatedDevicesRoute
   '/links': typeof AuthenticatedLinksRoute
+  '/notes': typeof AuthenticatedNotesRoute
+  '/pdf-tools': typeof AuthenticatedPdfToolsRoute
   '/roi': typeof AuthenticatedRoiRoute
   '/uptime': typeof AuthenticatedUptimeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -138,6 +152,8 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/devices': typeof AuthenticatedDevicesRoute
   '/links': typeof AuthenticatedLinksRoute
+  '/notes': typeof AuthenticatedNotesRoute
+  '/pdf-tools': typeof AuthenticatedPdfToolsRoute
   '/roi': typeof AuthenticatedRoiRoute
   '/uptime': typeof AuthenticatedUptimeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -157,6 +173,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/devices': typeof AuthenticatedDevicesRoute
   '/_authenticated/links': typeof AuthenticatedLinksRoute
+  '/_authenticated/notes': typeof AuthenticatedNotesRoute
+  '/_authenticated/pdf-tools': typeof AuthenticatedPdfToolsRoute
   '/_authenticated/roi': typeof AuthenticatedRoiRoute
   '/_authenticated/uptime': typeof AuthenticatedUptimeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -176,6 +194,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/devices'
     | '/links'
+    | '/notes'
+    | '/pdf-tools'
     | '/roi'
     | '/uptime'
     | '/.lovable/oauth/consent'
@@ -193,6 +213,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/devices'
     | '/links'
+    | '/notes'
+    | '/pdf-tools'
     | '/roi'
     | '/uptime'
     | '/.lovable/oauth/consent'
@@ -211,6 +233,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/devices'
     | '/_authenticated/links'
+    | '/_authenticated/notes'
+    | '/_authenticated/pdf-tools'
     | '/_authenticated/roi'
     | '/_authenticated/uptime'
     | '/.lovable/oauth/consent'
@@ -314,6 +338,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLinksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notes': {
+      id: '/_authenticated/notes'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof AuthenticatedNotesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pdf-tools': {
+      id: '/_authenticated/pdf-tools'
+      path: '/pdf-tools'
+      fullPath: '/pdf-tools'
+      preLoaderRoute: typeof AuthenticatedPdfToolsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/roi': {
       id: '/_authenticated/roi'
       path: '/roi'
@@ -352,6 +390,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDevicesRoute: typeof AuthenticatedDevicesRoute
   AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
+  AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
+  AuthenticatedPdfToolsRoute: typeof AuthenticatedPdfToolsRoute
   AuthenticatedRoiRoute: typeof AuthenticatedRoiRoute
   AuthenticatedUptimeRoute: typeof AuthenticatedUptimeRoute
 }
@@ -363,6 +403,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDevicesRoute: AuthenticatedDevicesRoute,
   AuthenticatedLinksRoute: AuthenticatedLinksRoute,
+  AuthenticatedNotesRoute: AuthenticatedNotesRoute,
+  AuthenticatedPdfToolsRoute: AuthenticatedPdfToolsRoute,
   AuthenticatedRoiRoute: AuthenticatedRoiRoute,
   AuthenticatedUptimeRoute: AuthenticatedUptimeRoute,
 }

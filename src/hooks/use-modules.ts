@@ -2,10 +2,13 @@ import {
   Activity,
   Calculator,
   ClipboardList,
+  FileText,
   Link2,
   MonitorSmartphone,
   Palette,
+  StickyNote,
 } from "lucide-react";
+
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
