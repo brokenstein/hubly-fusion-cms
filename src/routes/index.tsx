@@ -1,5 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ClipboardList, MonitorSmartphone, Activity, Link2, ArrowRight } from "lucide-react";
+import {
+  ClipboardList,
+  MonitorSmartphone,
+  Activity,
+  Link2,
+  FileText,
+  StickyNote,
+  Palette,
+  Calculator,
+  ArrowRight,
+} from "lucide-react";
 
 import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
 import { Button } from "@/components/ui/button";
@@ -8,16 +18,17 @@ import { GoogleIcon } from "@/components/icons/GoogleIcon";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OpsKit — Cases, Devices, Uptime & Links in one CMS" },
+      { title: "OpsKit — All your operations tools in one workspace" },
       {
         name: "description",
         content:
-          "OpsKit merges case tracking, a device software matrix, Uptime Kuma monitoring and a Dashy link dashboard into one workspace with a single login.",
+          "OpsKit unifies case tracking, device management, uptime monitoring, link dashboards, PDF tools, notes, brand kits and ROI calculations behind a single login.",
       },
-      { property: "og:title", content: "OpsKit — One CMS for your daily tools" },
+      { property: "og:title", content: "OpsKit — One workspace for every operations tool" },
       {
         property: "og:description",
-        content: "Case tracking, device versions, uptime monitoring and link dashboards in one workspace.",
+        content:
+          "Case tracking, device versions, uptime monitoring, link dashboards, PDF tools, notes, brand kits and ROI calculations in one workspace.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -47,6 +58,26 @@ const modules = [
     title: "Link Tracker",
     body: "Your Dashy dashboard embedded in the workspace so every internal link stays one click away.",
   },
+  {
+    icon: FileText,
+    title: "PDF Tools",
+    body: "Embed your PDF toolkit for quick merges, splits, conversions and previews.",
+  },
+  {
+    icon: StickyNote,
+    title: "Notes",
+    body: "Named notepads for platform details, runbooks and quick reference that persist per workspace.",
+  },
+  {
+    icon: Palette,
+    title: "Brand Kits",
+    body: "Capture palettes, typography, logos and brand metadata for every client or product.",
+  },
+  {
+    icon: Calculator,
+    title: "ROI Calculator",
+    body: "Model savings and payback for prospects with adjustable templates and formulas.",
+  },
 ];
 
 
@@ -61,11 +92,12 @@ function Landing() {
             Unified operations CMS
           </p>
           <h1 className="mt-5 font-display text-4xl leading-tight md:text-6xl">
-            Four of your tools, <span className="text-gradient-brand">one workspace</span>
+            All your operations tools, <span className="text-gradient-brand">one workspace</span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground">
-            OpsKit combines the Case Tracker, Device Hub, Uptime Monitor and Link Tracker behind a
-            single login and one shared database.
+            OpsKit brings together the Case Tracker, Device Hub, Uptime Monitor, Link Tracker, PDF
+            Tools, Notes, Brand Kits and ROI Calculator behind a single login and one shared
+            database.
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -103,7 +135,7 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-        OpsKit · Cases · Devices · Uptime · Links
+        OpsKit · Cases · Devices · Uptime · Links · PDF Tools · Notes · Brand Kits · ROI
       </footer>
     </main>
   );

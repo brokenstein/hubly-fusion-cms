@@ -4,10 +4,14 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   Activity,
   ArrowUpRight,
+  Calculator,
   ClipboardList,
+  FileText,
   Link2,
   MonitorSmartphone,
+  Palette,
   RefreshCw,
+  StickyNote,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -27,12 +31,13 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       {
         name: "description",
         content:
-          "One overview of open cases, new cases logged today, tracked devices and live uptime monitors.",
+          "One overview of open cases, new cases logged today, tracked devices, live uptime monitors, link dashboards, PDF tools, notes, brand kits and ROI calculations.",
       },
       { property: "og:title", content: "Overview — OpsKit workspace" },
       {
         property: "og:description",
-        content: "Cases, devices, uptime monitors and link dashboards at a glance.",
+        content:
+          "Cases, devices, uptime monitors, link dashboards, PDF tools, notes, brand kits and ROI calculations at a glance.",
       },
     ],
   }),
@@ -63,6 +68,30 @@ const modules = [
     label: "Link Tracker",
     icon: Link2,
     blurb: "Your Dashy dashboard embedded right in the workspace.",
+  },
+  {
+    to: "/pdf-tools",
+    label: "PDF Tools",
+    icon: FileText,
+    blurb: "Embedded PDF toolkit for merges, splits and conversions.",
+  },
+  {
+    to: "/notes",
+    label: "Notes",
+    icon: StickyNote,
+    blurb: "Named notepads for platform details and quick reference.",
+  },
+  {
+    to: "/brand",
+    label: "Brand Kits",
+    icon: Palette,
+    blurb: "Palettes, typography and logos captured per brand.",
+  },
+  {
+    to: "/roi",
+    label: "ROI Calculator",
+    icon: Calculator,
+    blurb: "Model savings and payback for a prospect.",
   },
 ] as const;
 
@@ -108,7 +137,8 @@ function Overview() {
       <header>
         <h1 className="font-display text-2xl font-semibold">Workspace overview</h1>
         <p className="text-sm text-muted-foreground">
-          Cases, devices, uptime and link dashboards — all in one place.
+          Cases, devices, uptime, links, PDF tools, notes, brand kits and ROI calculators — all in
+          one place.
         </p>
       </header>
 
