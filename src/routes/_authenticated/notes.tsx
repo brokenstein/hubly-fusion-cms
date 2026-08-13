@@ -54,10 +54,12 @@ function NotesPage() {
   const active = list.find((p) => p.id === activeId) ?? list[0] ?? null;
 
   useEffect(() => {
-    if (loaded && list.length && !list.some((p) => p.id === activeId)) {
-      setActiveId(list[0].id);
+    const first = list[0];
+    if (loaded && first && !list.some((p) => p.id === activeId)) {
+      setActiveId(first.id);
     }
   }, [loaded, list, activeId]);
+
 
   const addPad = () => {
     const pad = newPad(`Notepad ${list.length + 1}`);

@@ -45,6 +45,20 @@ export const WORKSPACE_MODULES = [
     description: "Embed your Dashy dashboard of links in the workspace.",
   },
   {
+    key: "pdftools",
+    to: "/pdf-tools",
+    label: "PDF Tools",
+    icon: FileText,
+    description: "Embed your PDF toolkit for quick merges, splits and conversions.",
+  },
+  {
+    key: "notes",
+    to: "/notes",
+    label: "Notes",
+    icon: StickyNote,
+    description: "Named notepads for platform details and quick reference.",
+  },
+  {
     key: "brand",
     to: "/brand",
     label: "Brand Kits",
@@ -69,9 +83,12 @@ export const DEFAULT_MODULE_TOGGLES: ModuleToggles = {
   devices: true,
   uptime: true,
   dashy: true,
+  pdftools: true,
+  notes: true,
   brand: false,
   roi: false,
 };
+
 
 /**
  * Workspace-wide enabled/disabled state for each module. Every signed-in user
