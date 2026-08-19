@@ -140,6 +140,67 @@ function NotesPage() {
   const updateBody = (id: string, body: string) =>
     setPads(list.map((p) => (p.id === id ? { ...p, body, updatedAt: new Date().toISOString() } : p)));
 
+  const [uploading, setUploading] = useState(false);
+
+  const addImages = useCallback(
+    async (padId: string, files: File[]) => {
+      const images = files.filter((f) => f.type.startsWith("image/"));
+      if (images.length === 0) return;
+      setUploading(true);
+      try {
+        const { data: auth } = await supabase.auth.getUser();
+        const userId = auth.user?.id;
+        if (!userId) throw new Error("You need to be signed in to attach images.");
+
+        const uploaded: NoteImage[] = [];
+        for (const file of images) {
+          const ext = (file.name.split(".").pop() ?? "png").toLowerCase().slice(0, 5);
+          const path = `${userId}/${padId}/${uid()}.${ext}`;
+          const { error } = await supabase.storage
+            .from(BUCKET)
+            .upload(path, file, { contentType: file.type, upsert: false });
+          if (error) throw error;
+          uploaded.push({ path, name: file.name || "Pasted image" });
+        }
+
+        setPads((prev) =>
+          (prev ?? []).map((p) =>
+            p.id === padId
+              ? {
+                  ...p,
+                  images: [...(p.images ?? []), ...uploaded],
+                  updatedAt: new Date().toISOString(),
+                }
+              : p,
+          ),
+        );
+        toast.success(uploaded.length > 1 ? `${uploaded.length} images added` : "Image added");
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Image upload failed");
+      } finally {
+        setUploading(false);
+      }
+    },
+    [setPads],
+  );
+
+  const removeImage = async (padId: string, image: NoteImage) => {
+    setPads((prev) =>
+      (prev ?? []).map((p) =>
+        p.id === padId
+          ? {
+              ...p,
+              images: (p.images ?? []).filter((i) => i.path !== image.path),
+              updatedAt: new Date().toISOString(),
+            }
+          : p,
+      ),
+    );
+    const { error } = await supabase.storage.from(BUCKET).remove([image.path]);
+    if (error) console.error("[notes] image delete failed", error);
+  };
+
+
   const commitRename = (id: string) => {
     const title = renameDraft.trim();
     if (!title) {
