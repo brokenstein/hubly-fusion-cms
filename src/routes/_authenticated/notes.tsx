@@ -131,14 +131,18 @@ function NotesPage() {
 
   const addPad = () => {
     const pad = newPad(`Notepad ${list.length + 1}`);
-    setPads([...list, pad]);
+    setPads((prev) => [...(prev ?? []), pad]);
     setActiveId(pad.id);
     setRenamingId(pad.id);
     setRenameDraft(pad.title);
   };
 
   const updateBody = (id: string, body: string) =>
-    setPads(list.map((p) => (p.id === id ? { ...p, body, updatedAt: new Date().toISOString() } : p)));
+    setPads((prev) =>
+      (prev ?? []).map((p) =>
+        p.id === id ? { ...p, body, updatedAt: new Date().toISOString() } : p,
+      ),
+    );
 
   const [uploading, setUploading] = useState(false);
 
@@ -196,8 +200,7 @@ function NotesPage() {
           : p,
       ),
     );
-    const { error } = await supabase.storage.from(BUCKET).remove([image.path]);
-    if (error) console.error("[notes] image delete failed", error);
+    // Detach only — the file stays in private storage so nothing is lost by accident.
   };
 
 
@@ -207,12 +210,13 @@ function NotesPage() {
       setRenamingId(null);
       return;
     }
-    setPads(list.map((p) => (p.id === id ? { ...p, title } : p)));
+    setPads((prev) => (prev ?? []).map((p) => (p.id === id ? { ...p, title } : p)));
     setRenamingId(null);
   };
 
   const removePad = (id: string) => {
-    setPads(list.filter((p) => p.id !== id));
+    // Only the notepad entry is removed; uploaded images stay in storage.
+    setPads((prev) => (prev ?? []).filter((p) => p.id !== id));
     toast.success("Notepad deleted");
   };
 

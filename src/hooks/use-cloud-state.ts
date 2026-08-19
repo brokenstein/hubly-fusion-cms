@@ -13,6 +13,10 @@ export function useCloudState<T>(key: string, initial: T) {
   const instanceId = useId();
   const skipNextWrite = useRef(true);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** True while local edits are unsaved or a save is in flight. */
+  const dirty = useRef(false);
+  /** Serialized value of the last payload we wrote ourselves. */
+  const lastWritten = useRef<string | null>(null);
 
 
   useEffect(() => {
@@ -47,13 +51,17 @@ export function useCloudState<T>(key: string, initial: T) {
 
       if (cancelled) return;
       if (error) {
+        // Stay un-loaded: writing now would overwrite good server data with defaults.
         console.error(`[cloud-state:${key}] load failed`, error);
-        setLoaded(true);
         return;
       }
 
       if (data) {
-        setValue(data.value as T);
+        if (!dirty.current) {
+          skipNextWrite.current = true;
+          lastWritten.current = JSON.stringify(data.value);
+          setValue(data.value as T);
+        }
         setLoaded(true);
         return;
       }
@@ -75,10 +83,14 @@ export function useCloudState<T>(key: string, initial: T) {
         { event: "*", schema: "public", table: "app_state", filter: `key=eq.${key}` },
         (payload) => {
           const row = payload.new as { value: T; user_id: string } | null;
-          if (row && row.user_id === userId && row.value !== undefined) {
-            skipNextWrite.current = true;
-            setValue(row.value);
-          }
+          if (!row || row.user_id !== userId || row.value === undefined) return;
+          // Never clobber edits the user is still making (or that are mid-save).
+          if (dirty.current) return;
+          const incoming = JSON.stringify(row.value);
+          // Ignore the echo of our own write.
+          if (incoming === lastWritten.current) return;
+          skipNextWrite.current = true;
+          setValue(row.value);
         },
       )
       .subscribe();
@@ -96,13 +108,23 @@ export function useCloudState<T>(key: string, initial: T) {
       skipNextWrite.current = false;
       return;
     }
+    const serialized = JSON.stringify(value);
+    if (serialized === lastWritten.current) return;
+
+    dirty.current = true;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       const { error } = await supabase.from("app_state").upsert(
         { key, user_id: userId, value: value as never, updated_at: new Date().toISOString() },
         { onConflict: "user_id,key" },
       );
-      if (error) console.error(`[cloud-state:${key}] save failed`, error);
+      if (error) {
+        // Keep the local value authoritative so nothing typed is lost.
+        console.error(`[cloud-state:${key}] save failed`, error);
+        return;
+      }
+      lastWritten.current = serialized;
+      dirty.current = false;
     }, 500);
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
