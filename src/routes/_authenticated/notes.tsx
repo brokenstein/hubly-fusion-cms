@@ -131,14 +131,18 @@ function NotesPage() {
 
   const addPad = () => {
     const pad = newPad(`Notepad ${list.length + 1}`);
-    setPads([...list, pad]);
+    setPads((prev) => [...(prev ?? []), pad]);
     setActiveId(pad.id);
     setRenamingId(pad.id);
     setRenameDraft(pad.title);
   };
 
   const updateBody = (id: string, body: string) =>
-    setPads(list.map((p) => (p.id === id ? { ...p, body, updatedAt: new Date().toISOString() } : p)));
+    setPads((prev) =>
+      (prev ?? []).map((p) =>
+        p.id === id ? { ...p, body, updatedAt: new Date().toISOString() } : p,
+      ),
+    );
 
   const [uploading, setUploading] = useState(false);
 
