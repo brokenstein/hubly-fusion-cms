@@ -200,8 +200,7 @@ function NotesPage() {
           : p,
       ),
     );
-    const { error } = await supabase.storage.from(BUCKET).remove([image.path]);
-    if (error) console.error("[notes] image delete failed", error);
+    // Detach only — the file stays in private storage so nothing is lost by accident.
   };
 
 
