@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Check, Loader2, Pencil, Plus, StickyNote, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Check, ImagePlus, Loader2, Pencil, Plus, StickyNote, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useCloudState } from "@/hooks/use-cloud-state";
+import { supabase } from "@/integrations/supabase/client";
+
 
 export const Route = createFileRoute("/_authenticated/notes")({
   ssr: false,
