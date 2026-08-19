@@ -79,10 +79,14 @@ export function useCloudState<T>(key: string, initial: T) {
         { event: "*", schema: "public", table: "app_state", filter: `key=eq.${key}` },
         (payload) => {
           const row = payload.new as { value: T; user_id: string } | null;
-          if (row && row.user_id === userId && row.value !== undefined) {
-            skipNextWrite.current = true;
-            setValue(row.value);
-          }
+          if (!row || row.user_id !== userId || row.value === undefined) return;
+          // Never clobber edits the user is still making (or that are mid-save).
+          if (dirty.current) return;
+          const incoming = JSON.stringify(row.value);
+          // Ignore the echo of our own write.
+          if (incoming === lastWritten.current) return;
+          skipNextWrite.current = true;
+          setValue(row.value);
         },
       )
       .subscribe();
