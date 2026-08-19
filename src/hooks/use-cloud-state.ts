@@ -13,6 +13,10 @@ export function useCloudState<T>(key: string, initial: T) {
   const instanceId = useId();
   const skipNextWrite = useRef(true);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** True while local edits are unsaved or a save is in flight. */
+  const dirty = useRef(false);
+  /** Serialized value of the last payload we wrote ourselves. */
+  const lastWritten = useRef<string | null>(null);
 
 
   useEffect(() => {
