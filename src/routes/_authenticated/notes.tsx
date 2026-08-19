@@ -211,12 +211,13 @@ function NotesPage() {
       setRenamingId(null);
       return;
     }
-    setPads(list.map((p) => (p.id === id ? { ...p, title } : p)));
+    setPads((prev) => (prev ?? []).map((p) => (p.id === id ? { ...p, title } : p)));
     setRenamingId(null);
   };
 
   const removePad = (id: string) => {
-    setPads(list.filter((p) => p.id !== id));
+    // Only the notepad entry is removed; uploaded images stay in storage.
+    setPads((prev) => (prev ?? []).filter((p) => p.id !== id));
     toast.success("Notepad deleted");
   };
 
