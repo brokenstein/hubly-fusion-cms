@@ -51,13 +51,17 @@ export function useCloudState<T>(key: string, initial: T) {
 
       if (cancelled) return;
       if (error) {
+        // Stay un-loaded: writing now would overwrite good server data with defaults.
         console.error(`[cloud-state:${key}] load failed`, error);
-        setLoaded(true);
         return;
       }
 
       if (data) {
-        setValue(data.value as T);
+        if (!dirty.current) {
+          skipNextWrite.current = true;
+          lastWritten.current = JSON.stringify(data.value);
+          setValue(data.value as T);
+        }
         setLoaded(true);
         return;
       }
