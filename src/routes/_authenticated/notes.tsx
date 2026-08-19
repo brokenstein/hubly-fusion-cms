@@ -331,21 +331,69 @@ function NotesPage() {
             <Card className="space-y-3 p-4">
               <div className="flex items-center justify-between gap-2">
                 <h2 className="font-display text-lg font-semibold">{active.title}</h2>
-                <p className="text-xs text-muted-foreground">
-                  Saved {new Date(active.updatedAt).toLocaleString()}
-                </p>
+                <div className="flex items-center gap-2">
+                  {uploading && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="sr-only"
+                      onChange={(e) => {
+                        void addImages(active.id, Array.from(e.target.files ?? []));
+                        e.target.value = "";
+                      }}
+                    />
+                    <span className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs text-muted-foreground hover:bg-accent">
+                      <ImagePlus className="size-3.5" /> Add image
+                    </span>
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    Saved {new Date(active.updatedAt).toLocaleString()}
+                  </p>
+                </div>
               </div>
               <Textarea
                 value={active.body}
                 onChange={(e) => updateBody(active.id, e.target.value)}
-                placeholder="Platform details, logins to request, escalation steps…"
-                className="min-h-[55vh] resize-y font-mono text-sm"
+                onPaste={(e) => {
+                  const files = Array.from(e.clipboardData.files).filter((f) =>
+                    f.type.startsWith("image/"),
+                  );
+                  if (files.length > 0) {
+                    e.preventDefault();
+                    void addImages(active.id, files);
+                  }
+                }}
+                onDrop={(e) => {
+                  const files = Array.from(e.dataTransfer.files).filter((f) =>
+                    f.type.startsWith("image/"),
+                  );
+                  if (files.length > 0) {
+                    e.preventDefault();
+                    void addImages(active.id, files);
+                  }
+                }}
+                placeholder="Platform details, logins to request, escalation steps… paste a screenshot to attach it"
+                className="min-h-[45vh] resize-y font-mono text-sm"
               />
+              {(active.images?.length ?? 0) > 0 && (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                  {(active.images ?? []).map((image) => (
+                    <NoteImageTile
+                      key={image.path}
+                      image={image}
+                      onRemove={() => void removeImage(active.id, image)}
+                    />
+                  ))}
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">
-                Changes save automatically to your account.
+                Changes save automatically. Paste or drop screenshots straight into the notepad.
               </p>
             </Card>
           )}
+
         </div>
       )}
     </div>
