@@ -34,17 +34,83 @@ export const Route = createFileRoute("/_authenticated/notes")({
   component: NotesPage,
 });
 
-type Notepad = { id: string; title: string; body: string; updatedAt: string };
+type NoteImage = { path: string; name: string };
+
+type Notepad = {
+  id: string;
+  title: string;
+  body: string;
+  updatedAt: string;
+  images?: NoteImage[];
+};
+
+const uid = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `pad-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const newPad = (title: string): Notepad => ({
-  id:
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `pad-${Date.now()}`,
+  id: uid(),
   title,
   body: "",
+  images: [],
   updatedAt: new Date().toISOString(),
 });
+
+const BUCKET = "note-images";
+
+/** Renders a stored note image via a short-lived signed URL. */
+function NoteImageTile({
+  image,
+  onRemove,
+}: {
+  image: NoteImage;
+  onRemove: () => void;
+}) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase.storage
+      .from(BUCKET)
+      .createSignedUrl(image.path, 60 * 60)
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          console.error("[notes] signed url failed", error);
+          return;
+        }
+        setUrl(data?.signedUrl ?? null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [image.path]);
+
+  return (
+    <figure className="group relative overflow-hidden rounded-md border bg-muted/30">
+      {url ? (
+        <a href={url} target="_blank" rel="noreferrer">
+          <img src={url} alt={image.name} loading="lazy" className="h-32 w-full object-cover" />
+        </a>
+      ) : (
+        <div className="flex h-32 items-center justify-center">
+          <Loader2 className="size-4 animate-spin text-muted-foreground" />
+        </div>
+      )}
+      <Button
+        size="icon"
+        variant="ghost"
+        aria-label={`Remove ${image.name}`}
+        className="absolute right-1 top-1 size-7 bg-background/80 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
+        onClick={onRemove}
+      >
+        <Trash2 className="size-3.5" />
+      </Button>
+    </figure>
+  );
+}
+
 
 function NotesPage() {
   const [pads, setPads, loaded] = useCloudState<Notepad[]>("notepads", []);
