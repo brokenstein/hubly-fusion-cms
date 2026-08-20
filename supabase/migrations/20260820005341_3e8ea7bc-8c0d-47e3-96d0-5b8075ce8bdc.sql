@@ -1,0 +1,1 @@
+UPDATE public.devices SET image_url = '/samsung-sbb.png' WHERE id = '7a48a7b2-bf8b-4179-b485-de46620d986f';
