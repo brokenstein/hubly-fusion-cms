@@ -1,0 +1,1 @@
+update public.devices set image_url = '/asus-pl64.png' where id = '3fdc05a5-a49a-4bc9-add4-95a4b1210975';
