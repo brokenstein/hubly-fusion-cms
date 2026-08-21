@@ -656,8 +656,6 @@ function EditDeviceDialog({
               ["name", "Name", "BrightSign XT244"],
               ["model", "Model", "XT244"],
               ["os", "Operating system", "BrightSignOS 9"],
-              ["image_url", "Image URL", "https://…"],
-              ["download_url", "Firmware / download URL", "https://…"],
             ] as const
           ).map(([key, label, placeholder]) => (
             <div key={key} className="space-y-1.5">
@@ -670,6 +668,26 @@ function EditDeviceDialog({
               />
             </div>
           ))}
+          <DeviceAssetField
+            id={`edit-${device.id}-image`}
+            label="Device image"
+            placeholder="https://… or upload"
+            kind="images"
+            accept="image/*"
+            canUpload
+            value={form.image_url}
+            onChange={(v) => setForm((f) => ({ ...f, image_url: v }))}
+          />
+          <DeviceAssetField
+            id={`edit-${device.id}-download`}
+            label="Autorun / firmware file"
+            placeholder="https://… or upload"
+            kind="files"
+            canUpload
+            value={form.download_url}
+            onChange={(v) => setForm((f) => ({ ...f, download_url: v }))}
+          />
+
           <div className="space-y-1.5">
             <Label htmlFor="edit-notes">Notes / extra details</Label>
             <Textarea
