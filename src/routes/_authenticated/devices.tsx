@@ -255,16 +255,8 @@ function DevicesPage() {
         {filtered.map((device, index) => (
           <article key={device.id} className="device-card">
             <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-secondary to-muted p-6">
-              {device.image_url ? (
-                <img
-                  src={device.image_url}
-                  alt={`${device.name} device photo`}
-                  loading="lazy"
-                  className="max-h-full max-w-full object-contain drop-shadow-2xl"
-                />
-              ) : (
-                <Monitor className="size-20 text-muted-foreground/50" />
-              )}
+              <DeviceImage value={device.image_url} name={device.name} />
+
               {isAdmin && (
                 <div className="absolute left-2 top-2 flex gap-1">
                   <Button
