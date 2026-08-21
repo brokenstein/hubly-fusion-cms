@@ -19,6 +19,8 @@ import {
 
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { DeviceAssetField, useResolvedAsset } from "@/components/device-asset-field";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
