@@ -19,6 +19,8 @@ import {
 
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { DeviceAssetField, useResolvedAsset } from "@/components/device-asset-field";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -255,16 +257,8 @@ function DevicesPage() {
         {filtered.map((device, index) => (
           <article key={device.id} className="device-card">
             <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-secondary to-muted p-6">
-              {device.image_url ? (
-                <img
-                  src={device.image_url}
-                  alt={`${device.name} device photo`}
-                  loading="lazy"
-                  className="max-h-full max-w-full object-contain drop-shadow-2xl"
-                />
-              ) : (
-                <Monitor className="size-20 text-muted-foreground/50" />
-              )}
+              <DeviceImage value={device.image_url} name={device.name} />
+
               {isAdmin && (
                 <div className="absolute left-2 top-2 flex gap-1">
                   <Button
@@ -322,17 +316,9 @@ function DevicesPage() {
 
               <div className="mb-4 flex items-center justify-between gap-2">
                 {device.os ? <span className="version-badge">{device.os}</span> : <span />}
-                {device.download_url && (
-                  <a
-                    href={device.download_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-primary transition-colors hover:text-primary/80"
-                  >
-                    <Download className="size-3.5" /> Download
-                  </a>
-                )}
+                {device.download_url && <DeviceDownloadLink value={device.download_url} />}
               </div>
+
 
               {device.notes && (
                 <div className="mb-4 whitespace-pre-wrap rounded-lg border border-border/60 bg-secondary/40 p-3 text-xs text-muted-foreground">
@@ -499,8 +485,6 @@ function AddDeviceDialog({ platforms }: { platforms: Platform[] }) {
               ["name", "Name", "BrightSign XT244"],
               ["model", "Model", "XT244"],
               ["os", "Operating system", "BrightSignOS 9"],
-              ["image_url", "Image URL", "https://…"],
-              ["download_url", "Firmware / download URL", "https://…"],
             ] as const
           ).map(([key, label, placeholder]) => (
             <div key={key} className="space-y-1.5">
@@ -513,6 +497,26 @@ function AddDeviceDialog({ platforms }: { platforms: Platform[] }) {
               />
             </div>
           ))}
+          <DeviceAssetField
+            id="device-image"
+            label="Device image"
+            placeholder="https://… or upload"
+            kind="images"
+            accept="image/*"
+            canUpload
+            value={form.image_url}
+            onChange={(v) => setForm((f) => ({ ...f, image_url: v }))}
+          />
+          <DeviceAssetField
+            id="device-download"
+            label="Autorun / firmware file"
+            placeholder="https://… or upload"
+            kind="files"
+            canUpload
+            value={form.download_url}
+            onChange={(v) => setForm((f) => ({ ...f, download_url: v }))}
+          />
+
           <div className="space-y-1.5">
             <Label htmlFor="device-notes">Notes / extra details</Label>
             <Textarea
@@ -656,8 +660,6 @@ function EditDeviceDialog({
               ["name", "Name", "BrightSign XT244"],
               ["model", "Model", "XT244"],
               ["os", "Operating system", "BrightSignOS 9"],
-              ["image_url", "Image URL", "https://…"],
-              ["download_url", "Firmware / download URL", "https://…"],
             ] as const
           ).map(([key, label, placeholder]) => (
             <div key={key} className="space-y-1.5">
@@ -670,6 +672,26 @@ function EditDeviceDialog({
               />
             </div>
           ))}
+          <DeviceAssetField
+            id={`edit-${device.id}-image`}
+            label="Device image"
+            placeholder="https://… or upload"
+            kind="images"
+            accept="image/*"
+            canUpload
+            value={form.image_url}
+            onChange={(v) => setForm((f) => ({ ...f, image_url: v }))}
+          />
+          <DeviceAssetField
+            id={`edit-${device.id}-download`}
+            label="Autorun / firmware file"
+            placeholder="https://… or upload"
+            kind="files"
+            canUpload
+            value={form.download_url}
+            onChange={(v) => setForm((f) => ({ ...f, download_url: v }))}
+          />
+
           <div className="space-y-1.5">
             <Label htmlFor="edit-notes">Notes / extra details</Label>
             <Textarea
@@ -720,5 +742,33 @@ function EditDeviceDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function DeviceImage({ value, name }: { value: string | null; name: string }) {
+  const url = useResolvedAsset(value);
+  if (!url) return <Monitor className="size-20 text-muted-foreground/50" />;
+  return (
+    <img
+      src={url}
+      alt={`${name} device photo`}
+      loading="lazy"
+      className="max-h-full max-w-full object-contain drop-shadow-2xl"
+    />
+  );
+}
+
+function DeviceDownloadLink({ value }: { value: string }) {
+  const url = useResolvedAsset(value, true);
+  if (!url) return null;
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center gap-1.5 text-xs text-primary transition-colors hover:text-primary/80"
+    >
+      <Download className="size-3.5" /> Download
+    </a>
   );
 }
