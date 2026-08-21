@@ -322,17 +322,9 @@ function DevicesPage() {
 
               <div className="mb-4 flex items-center justify-between gap-2">
                 {device.os ? <span className="version-badge">{device.os}</span> : <span />}
-                {device.download_url && (
-                  <a
-                    href={device.download_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-primary transition-colors hover:text-primary/80"
-                  >
-                    <Download className="size-3.5" /> Download
-                  </a>
-                )}
+                {device.download_url && <DeviceDownloadLink value={device.download_url} />}
               </div>
+
 
               {device.notes && (
                 <div className="mb-4 whitespace-pre-wrap rounded-lg border border-border/60 bg-secondary/40 p-3 text-xs text-muted-foreground">
