@@ -744,3 +744,31 @@ function EditDeviceDialog({
     </Dialog>
   );
 }
+
+function DeviceImage({ value, name }: { value: string | null; name: string }) {
+  const url = useResolvedAsset(value);
+  if (!url) return <Monitor className="size-20 text-muted-foreground/50" />;
+  return (
+    <img
+      src={url}
+      alt={`${name} device photo`}
+      loading="lazy"
+      className="max-h-full max-w-full object-contain drop-shadow-2xl"
+    />
+  );
+}
+
+function DeviceDownloadLink({ value }: { value: string }) {
+  const url = useResolvedAsset(value, true);
+  if (!url) return null;
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center gap-1.5 text-xs text-primary transition-colors hover:text-primary/80"
+    >
+      <Download className="size-3.5" /> Download
+    </a>
+  );
+}
